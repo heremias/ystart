@@ -1,5 +1,6 @@
 FROM ghcr.io/heremias/y-update-y-master:latest
 
+RUN chmod 777 -R /var/www/drupal/web/sites/default/files
 COPY mods.sh /var/www
 COPY drushcp.sh /var/www
 COPY dsync.sh /var/www
