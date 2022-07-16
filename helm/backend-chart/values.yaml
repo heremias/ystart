@@ -1,0 +1,21 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/heremias/y-update-y-master
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "e457d2a641ef7990b77f46a31596415a7dc4a13d"
+
+imagePullSecrets:
+  - name: wise
+
+service:
+  type: LoadBalancer
+  port: 80
+  targetPort: 8080
+
+configMap:
+  name: yconfig
+
+ingress:
+  enabled: false

@@ -1,0 +1,7 @@
+apiVersion: v1
+data:
+  EMPLOYEE_API_BASE_URL_VALUE: https://51.138.125.122:8443/api/v1/skills
+  SKILL_API_BASE_URL_VALUE: https://51.138.125.122:8443/api/v1/skills
+kind: ConfigMap
+metadata:
+  name: {{ .Values.configMap.name }}

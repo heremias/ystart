@@ -72,6 +72,23 @@ composer require drupal/decoupled_pages:^1.0
 composer require drupal/layoutcomponents:^4.0
 composer require drupal/cl_server:^1.0@beta
 composer require drupal/sfc:^1.7
+composer require drupal/config_ignore:^3.0@beta
+composer require drupal/config_filter:^2.4
+composer require drupal/config_inspector:^2.0
+composer require drupal/config_partial_export:^1.6
+composer require drupal/config_merge:^1.0@RC
+composer require drupal/config_direct_save:^2.1
+composer require drupal/config_actions:^1.3
+composer require drupal/config_override:^1.0@RC
+composer require drupal/config_export_ignore:^1.1
+composer require drupal/content_as_config:^1.0
+composer require drupal/config_notify:^1.9
+composer require drupal/config_token:^1.3
+composer require drupal/config_suite:^2.0
+composer require drupal/config_actions_provider:^1.0
+composer require drupal/config_update:^1.7
+
+
 
 cd /var/www/drupal/web/sites/default
 chmod 777 -R files

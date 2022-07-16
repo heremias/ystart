@@ -1,4 +1,4 @@
-FROM ghcr.io/heremias/y-update-y-master:latest
+FROM ghcr.io/heremias/y-base-y-master:latest
 
 RUN chmod 777 -R /var/www/drupal/web/sites/default/files
 COPY mods.sh /var/www
