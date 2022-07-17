@@ -74,6 +74,13 @@ jobs:
             ${{ env.CONTAINER_REGISTRY_HOSTNAME }}/${{ env.CONTAINER_REGISTRY_REPOSITORY }}/${{ env.CONTAINER_REGISTRY_IMAGE_PREFIX }}-${{ matrix.platform }}-${{ env.RUNTIME_ENV }}:latest
             ${{ env.CONTAINER_REGISTRY_HOSTNAME }}/${{ env.CONTAINER_REGISTRY_REPOSITORY }}/${{ env.CONTAINER_REGISTRY_IMAGE_PREFIX }}-${{ matrix.platform }}-${{ env.RUNTIME_ENV }}:${{ github.sha }}
 
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: web
+          path: |
+            web
+
   #
   # Configure
   #

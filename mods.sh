@@ -88,8 +88,9 @@ composer require drupal/config_token:^1.3
 composer require drupal/config_suite:^2.0
 composer require drupal/config_actions_provider:^1.0
 composer require drupal/config_update:^1.7
-
-
+composer require drupal/openy_lily:^1.1
+composer require drupal/openy_carnation:^2
+composer require drupal/openy_rose:^1.1
 
 cd /var/www/drupal/web/sites/default
 chmod 777 -R files
