@@ -1,7 +1,8 @@
 FROM ghcr.io/heremias/y-base-y-master:latest
 
 RUN chmod 777 -R /var/www/drupal/web/sites/default/files
-COPY scripts/ /var/www
+ADD scripts /var/www
+COPY scripts /var/www
 
 COPY load.sh /var/www
 COPY concp.sh /var/www
