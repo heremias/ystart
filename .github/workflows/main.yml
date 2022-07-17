@@ -78,7 +78,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: web
-          path: /var/www/drupal/web/
+          path: drupal/web/
 
   #
   # Configure
