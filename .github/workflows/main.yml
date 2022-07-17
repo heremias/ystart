@@ -120,19 +120,3 @@ jobs:
           pull_strategy: "--no-ff"
           push: true
           token: ${{ env.GIT_DEPLOY_REPOSITORY_AUTHOR_TOKEN }}
-
-      - uses: actions/download-artifact@v3
-        with:
-          name: web
-          path: web.zip
-    
-      - name: Display structure of downloaded files
-        run: ls -R
-
-      - name: unZip artifact for deployment
-        run: unzip -qq 'web.zip' -d web && rm web.zip
-
-      - name: Display structure of downloaded files
-        run: ls -R
-
-
