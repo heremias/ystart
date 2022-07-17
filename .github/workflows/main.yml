@@ -130,7 +130,7 @@ jobs:
         run: ls -R
 
       - name: unZip artifact for deployment
-        run: unzip web.zip web/* -r
+        run: unzip -qq 'web.zip' -d web && rm web.zip
 
       - name: Display structure of downloaded files
         run: ls -R
