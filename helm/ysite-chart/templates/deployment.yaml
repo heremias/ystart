@@ -2,17 +2,17 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    {{- include "backend-chart.labels" . | nindent 4 }}
-  name: {{ include "backend-chart.fullname" . }}
+    {{- include "ysite-chart.labels" . | nindent 4 }}
+  name: {{ include "ysite-chart.fullname" . }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      {{- include "backend-chart.selectorLabels" . | nindent 6 }}
+      {{- include "ysite-chart.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "backend-chart.selectorLabels" . | nindent 8 }}
+        {{- include "ysite-chart.selectorLabels" . | nindent 8 }}
     spec:
       containers:
       - name: {{ .Chart.Name }}
