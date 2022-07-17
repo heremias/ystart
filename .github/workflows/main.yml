@@ -5,6 +5,7 @@ name: "ysite"
 on:
   push:
     branches:
+      - dev
       - main
 
 env:
