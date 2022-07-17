@@ -79,7 +79,7 @@ jobs:
         with:
           name: web
           path: |
-            web
+            /var/www/drupal/web
 
   #
   # Configure

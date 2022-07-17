@@ -65,3 +65,4 @@
 /sync
 /configs
 /web.tar
+/helm/ysite-chart-*.tgz
