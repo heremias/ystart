@@ -1,0 +1,15 @@
+name: Redirect rules exporter for Static Export
+description: Export redirect rules from Redirect contributed module using a custom exporter.
+type: module
+package: Static Suite - Static Export
+core_version_requirement: ^9.1
+configure: static_export_exporter_redirect.settings
+dependencies:
+  - redirect:redirect
+  - static_suite:static_export
+
+
+# Information added by Drupal.org packaging script on 2021-10-05
+version: '1.1.0-alpha3'
+project: 'static_suite'
+datestamp: 1633432760

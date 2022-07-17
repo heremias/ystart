@@ -1,0 +1,7 @@
+static_export_data_resolver_jsonapi.settings:
+  path: '/admin/config/static/export/entity/resolver/jsonapi'
+  defaults:
+    _form: \Drupal\static_export_data_resolver_jsonapi\Form\SettingsForm
+    _title: 'Settings for JSON:API data resolver'
+  requirements:
+    _permission: 'administer site configuration'

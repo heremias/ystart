@@ -1,0 +1,14 @@
+name: Static Export - Data Resolver - JSON:API
+type: module
+description: 'Provides a JSON:API data resolver for Static Export module.'
+package: Static Suite - Static Export
+core_version_requirement: ^9.1
+configure: static_export_data_resolver_jsonapi.settings
+dependencies:
+  - static_suite:static_export
+  - jsonapi:jsonapi
+
+# Information added by Drupal.org packaging script on 2021-10-05
+version: '1.1.0-alpha3'
+project: 'static_suite'
+datestamp: 1633432760

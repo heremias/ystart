@@ -1,0 +1,88 @@
+<?php
+
+/**
+ * @file
+ * Contains config_notify.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+
+/**
+ * Implements hook_help().
+ */
+function config_notify_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the config_notify module.
+    case 'help.page.config_notify':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Send different notifications based on the status of the configuration.') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_mail().
+ */
+function config_notify_mail($key, &$message, $params) {
+  switch ($key) {
+    case 'config_notify':
+      $message['from'] = \Drupal::config('system.site')->get('mail');
+      $message['subject'] = (string) new TranslatableMarkup('Config notify');
+      $message['body'][] = $params['message'];
+      break;
+  }
+}
+
+/**
+ * Implements hook_cron().
+ */
+function config_notify_cron() {
+  $notifier = \Drupal::service('config_notify.notifier');
+  $config = \Drupal::config('config_notify.settings');
+
+  $changes = $notifier->checkChanges();
+  if (!$changes) {
+    return;
+  }
+
+  if ($config->get('cron')) {
+    $last_sent = $notifier->getLastNotificationSent();
+    if ($config->get('daily')) {
+      if (date('Ymd', $last_sent) == date('Ymd')) {
+        // Notification already sent today.
+        return;
+      }
+    }
+
+    $sent = 0;
+
+    if ($config->get('slack')) {
+      $message = $notifier->getDefaultMessage(TRUE);
+      if (!$notifier->notifySlack($message)) {
+        \Drupal::logger('config_notify')->notice(t('Slack message not sent.'));
+      }
+      else {
+        $sent++;
+      }
+    }
+
+    if ($config->get('email')) {
+      $message = $notifier->getDefaultMessage();
+      if (!$notifier->notifyEmail($message, $config->get('email_to'))) {
+        \Drupal::logger('config_notify')->notice(t('Email message not sent.'));
+      }
+      else {
+        $sent++;
+      }
+    }
+
+    if ($sent > 0) {
+      \Drupal::logger('config_notify')->info(t('Notifications were triggered.'));
+      $notifier->setLastNotification(strtotime('now'));
+    }
+  }
+}

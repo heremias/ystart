@@ -1,0 +1,15 @@
+{
+  "name": "drupal/static_suite/static_export",
+  "description": "Exports data through GraphQL.",
+  "type": "drupal-drush",
+  "require": {
+    "php": ">=7.1.0"
+  },
+  "extra": {
+    "drush": {
+      "services": {
+        "drush.services.yml": "^9"
+      }
+    }
+  }
+}

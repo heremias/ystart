@@ -1,0 +1,45 @@
+<?php
+
+/**
+ * @file
+ * Static Export install file.
+ */
+
+/**
+ * Implements hook_requirements().
+ */
+function static_export_requirements($phase) {
+  $requirements = [];
+
+  if ($phase === 'runtime') {
+    if (static_export_are_exportable_entity_operations_enabled()) {
+      $dataResolverDefinitions = Drupal::service('plugin.manager.static_data_resolver')
+        ->getDefinitions();
+      if (count($dataResolverDefinitions) === 0) {
+        $requirements['static_export_missing_data_resolver'] = [
+          'title' => t('Static Export'),
+          'severity' => REQUIREMENT_ERROR,
+          'value' => t('Missing data resolver'),
+          'description' => t('Export operations for exportable entities are enabled, but no data resolver is installed. Please, install one of the default data resolvers provided by Static Suite (static_export_data_resolver_graphql -recommended-, static_export_data_resolver_jsonapi or static_export_data_resolver_json_serializer) or create your own one.'),
+        ];
+      }
+    }
+
+    if (static_export_are_exportable_config_operations_enabled() || static_export_are_exportable_locale_operations_enabled()) {
+      $outputFormatterDefinitions = Drupal::service('plugin.manager.static_output_formatter')
+        ->getDefinitions();
+      if (count($outputFormatterDefinitions) === 0) {
+        $requirements['static_export_missing_output_formatter'] = [
+          'title' => t('Static Export'),
+          'severity' => REQUIREMENT_ERROR,
+          'value' => t('Missing output formatter'),
+          'description' => t('Export operations for configuration objects and/or locales are enabled, but no output formatter is installed. Please, install one of the default output formatters provided by Static Suite (static_export_output_formatter_json -recommended-, static_export_output_formatter_xml or static_export_output_formatter_yaml) or create your own one.'),
+        ];
+      }
+    }
+  }
+
+  return $requirements;
+}
+
+

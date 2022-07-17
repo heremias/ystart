@@ -1,0 +1,7 @@
+static_export_stream_wrapper_local.settings:
+  path: '/admin/config/static/export/stream-wrappers/static-local'
+  defaults:
+    _form: \Drupal\static_export_stream_wrapper_local\Form\SettingsForm
+    _title: 'Settings for static-local stream wrapper'
+  requirements:
+    _permission: 'administer site configuration'

@@ -1,0 +1,13 @@
+gatsby.gatsby_admin_form:
+  title: 'Gatsby Settings'
+  route_name: gatsby.gatsby_admin_form
+  description: 'Gatsby Integration Settings to configure Live Preview and Incremental Builds'
+  base_route: gatsby.gatsby_admin_form
+  weight: 0
+
+gatsby.gatsby_fastbuilds_log:
+  title: 'Fastbuilds Log'
+  route_name: gatsby.gatsby_fastbuilds_log
+  description: 'View Gatsby Fastbuilds Log'
+  base_route: gatsby.gatsby_admin_form
+  weight: 10

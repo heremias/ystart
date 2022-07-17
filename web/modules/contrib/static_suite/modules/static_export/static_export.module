@@ -1,0 +1,590 @@
+<?php
+
+/**
+ * @file
+ * Static Export module file.
+ */
+
+use Drupal\config_translation\ConfigEntityMapper;
+use Drupal\Core\Entity\EditorialContentEntityBase;
+use Drupal\Core\Entity\EntityFormInterface;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StreamWrapper\StreamWrapperManager;
+use Drupal\Core\Url;
+use Drupal\menu_link_content\Entity\MenuLinkContent;
+use Drupal\static_export\Controller\ExportDataDownloadController;
+use Drupal\static_export\Exporter\ExporterPluginInterface;
+use Drupal\static_export\File\FileCollectionWriter;
+use Drupal\static_suite\Utility\DirectoryDownloadHelperInterface;
+use Drupal\taxonomy\TermInterface;
+
+/**
+ * Set the hook_entity_insert to the end of list.
+ */
+function static_export_module_implements_alter(&$implementations, $hook) {
+  switch ($hook) {
+    // Move our hook_entity_insert() and hook_entity_update()
+    // implementation to the end of the list.
+    case 'entity_update':
+    case 'entity_insert':
+      $group = $implementations['static_export'];
+      unset($implementations['static_export']);
+      $implementations['static_export'] = $group;
+      break;
+  }
+}
+
+/**
+ * Implements hook_entity_insert().
+ */
+function static_export_entity_insert(EntityInterface $entity) {
+  // Stop execution if export operations are disabled.
+  if (!static_export_are_exportable_entity_operations_enabled()) {
+    return TRUE;
+  }
+
+  // Early opt-out if STATIC_EXPORT_STOP_LISTENING_TO_CRUD_EVENTS environment
+  // variable is present.
+  if (getenv('STATIC_EXPORT_STOP_LISTENING_TO_CRUD_EVENTS', TRUE)) {
+    return TRUE;
+  }
+
+  // Entities that can be published/unpublished are always exported, even
+  // unpublished, to allow previews.
+  if ($entity instanceof EditorialContentEntityBase) {
+    static_export_do_entity_write($entity);
+  }
+  else {
+    // On first save, export entity only if its published. These entities are
+    // not nodes and we don't need them for previews.
+    if (static_export_is_entity_published($entity)) {
+      static_export_do_entity_write($entity);
+    }
+  }
+  return TRUE;
+}
+
+/**
+ * Implements hook_entity_update().
+ */
+function static_export_entity_update(EntityInterface $entity) {
+  // Stop execution if export operations are disabled.
+  if (!static_export_are_exportable_entity_operations_enabled()) {
+    return TRUE;
+  }
+  // Early opt-out if STATIC_EXPORT_STOP_LISTENING_TO_CRUD_EVENTS environment
+  // variable is present.
+  if (getenv('STATIC_EXPORT_STOP_LISTENING_TO_CRUD_EVENTS', TRUE)) {
+    return TRUE;
+  }
+
+  // Nodes and taxonomy terms are always exported, even unpublished, to allow
+  // previewing them.
+  // @todo Find a way to dynamically get which entities can be previewed.
+  if ($entity instanceof EditorialContentEntityBase || $entity instanceof TermInterface) {
+    static_export_do_entity_write($entity);
+  }
+  else {
+    if (static_export_is_entity_published($entity)) {
+      // On update, export non-node entity if it's published.
+      static_export_do_entity_write($entity);
+    }
+    elseif (static_export_was_entity_published($entity) && !static_export_is_entity_published($entity)) {
+      // On update, delete non-node entity if it's being unpublished.
+      static_export_entity_delete($entity);
+    }
+  }
+  return TRUE;
+}
+
+/**
+ * Implements hook_entity_delete().
+ */
+function static_export_entity_delete(EntityInterface $entity) {
+  // Stop execution if export operations are disabled.
+  if (!static_export_are_exportable_entity_operations_enabled()) {
+    return TRUE;
+  }
+
+  // Early opt-out if STATIC_EXPORT_STOP_LISTENING_TO_CRUD_EVENTS environment
+  // variable is present.
+  if (getenv('STATIC_EXPORT_STOP_LISTENING_TO_CRUD_EVENTS', TRUE)) {
+    return TRUE;
+  }
+
+  // On a delete operation, everything is deleted (nodes and other entities).
+  // No need to maintain an entity's json file, since the node is deleted.
+  /** @var \Drupal\static_export\Exporter\Type\Entity\EntityExporterPluginManagerInterface $entityExporterPluginManager */
+  $entityExporterPluginManager = \Drupal::service('plugin.manager.static_entity_exporter');
+  $entityExporter = $entityExporterPluginManager->createDefaultInstance();
+
+  // If is menulink we update the Menu and do not launch delete on MenuLinkContent.
+  if (_static_export_isMenuLink($entity)) {
+    return static_export_do_entity_write($entity);
+  }
+  if (!$entityExporter->isExportable(['entity' => $entity])) {
+    return FALSE;
+  }
+
+  // Check if it is exportable when running on CLI.
+  $exportableEntity = \Drupal::service('static_export.exportable_entity_manager')
+    ->getExportableEntity($entity);
+  $isRunningOnCli = \Drupal::service('static_suite.utils')->isRunningOnCli();
+  if ($isRunningOnCli && !$exportableEntity->getExportWhenCrudHappensOnCli()) {
+    return FALSE;
+  }
+
+  // Honor the value of STATIC_EXPORT_REQUEST_BUILD environmental variable.
+  $requestBuildOverride = getenv('STATIC_EXPORT_REQUEST_BUILD', TRUE);
+  if ($requestBuildOverride) {
+    $requestBuild = filter_var($requestBuildOverride, FILTER_VALIDATE_BOOLEAN);
+  }
+  else {
+    $requestBuild = TRUE;
+    // If running on CLI, we must check if a build must be requested.
+    if ($isRunningOnCli) {
+      $requestBuild = $exportableEntity->getRequestBuildWhenCrudExportsOnCli();
+    }
+  }
+
+  /** @var \Drupal\static_export\Exporter\Stack\ExporterStackExecutorInterface $exporterStackExecutor */
+  $exporterStackExecutor = \Drupal::service('static_export.exporter_stack_executor');
+  $stackId = $entityExporter::class . '--delete--' . $entity->getEntityTypeId() . '.' . $entity->bundle() . '' . $entity->id();
+  $options = [
+    'operation' => [
+      'id' => ExporterPluginInterface::OPERATION_DELETE,
+      'args' => [
+        'entity' => $entity,
+        'original-entity' => $entity->original ?? NULL,
+      ],
+    ],
+    'request-build' => $requestBuild,
+  ];
+  $exporterStackExecutor->add($stackId, $entityExporter, $options);
+
+  return TRUE;
+}
+
+/**
+ * Save entity data in disk for the configured format.
+ *
+ * @throws \Drupal\Component\Plugin\Exception\PluginException
+ */
+function static_export_do_entity_write(EntityInterface $entity) {
+  /** @var \Drupal\static_export\Exporter\Type\Entity\EntityExporterPluginManagerInterface $entityExporterPluginManager */
+  $entityExporterPluginManager = \Drupal::service('plugin.manager.static_entity_exporter');
+  $entityExporter = $entityExporterPluginManager->createDefaultInstance();
+  if (_static_export_isMenuLink($entity)) {
+    $entity = _static_export_getMenuFromMenuLink($entity);
+  }
+
+  if (!$entityExporter->isExportable(['entity' => $entity])) {
+    return FALSE;
+  }
+
+  // Check if it is exportable when running on CLI.
+  $exportableEntity = \Drupal::service('static_export.exportable_entity_manager')
+    ->getExportableEntity($entity);
+  $isRunningOnCli = \Drupal::service('static_suite.utils')->isRunningOnCli();
+  if ($isRunningOnCli && !$exportableEntity->getExportWhenCrudHappensOnCli()) {
+    return FALSE;
+  }
+
+  // Honor the value of STATIC_EXPORT_REQUEST_BUILD environmental variable.
+  $requestBuildOverride = getenv('STATIC_EXPORT_REQUEST_BUILD', TRUE);
+  if ($requestBuildOverride) {
+    $requestBuild = filter_var($requestBuildOverride, FILTER_VALIDATE_BOOLEAN);
+  }
+  else {
+    $requestBuild = TRUE;
+    // If running on CLI, we should check if a build must be requested.
+    if ($isRunningOnCli) {
+      $requestBuild = $exportableEntity->getRequestBuildWhenCrudExportsOnCli();
+    }
+  }
+
+  /** @var \Drupal\static_export\Exporter\Stack\ExporterStackExecutorInterface $exporterStackExecutor */
+  $exporterStackExecutor = \Drupal::service('static_export.exporter_stack_executor');
+  $stackId = $entityExporter::class . '--write--' . $entity->getEntityTypeId() . '.' . $entity->bundle() . '' . $entity->id();
+  $options = [
+    'operation' => [
+      'id' => ExporterPluginInterface::OPERATION_WRITE,
+      'args' => [
+        'entity' => $entity,
+        'original-entity' => $entity->original ?? NULL,
+      ],
+    ],
+    'request-build' => $requestBuild,
+  ];
+  $exporterStackExecutor->add($stackId, $entityExporter, $options);
+
+  return TRUE;
+}
+
+/**
+ * Get current published status from an entity.
+ */
+function static_export_is_entity_published(EntityInterface $entity) {
+  if ($entity instanceof EditorialContentEntityBase && method_exists($entity, 'isPublished')) {
+    return $entity->isPublished();
+  }
+  // Non Editorial Content Entities are always considered "published".
+  return TRUE;
+}
+
+/**
+ * Get previous published status from an entity.
+ */
+function static_export_was_entity_published(EntityInterface $entity) {
+  $originalEntity = $entity->original ?? NULL;
+  if (is_object($originalEntity) && $originalEntity instanceof EditorialContentEntityBase) {
+    return $originalEntity->isPublished();
+  }
+  // Non Editorial Content Entities are always considered "published".
+  return TRUE;
+}
+
+/**
+ * Get a Menu Entity from MenuLinkContent.
+ *
+ * @param \Drupal\Core\Entity\EntityInterface $menuLink
+ *   A MenuLinkContent object.
+ *
+ * @return \Drupal\Core\Entity\EntityInterface
+ *   An Exportable Entity
+ */
+function _static_export_getMenuFromMenuLink(EntityInterface $menuLink) {
+  if (!$menuLink instanceof MenuLinkContent) {
+    return $menuLink;
+  }
+  $menuName = $menuLink->getMenuName();
+  return \Drupal::service('static_suite.entity_utils')
+    ->loadEntity('menu', $menuName);
+}
+
+/**
+ * Check entity to Handle MenuLinkContent and Menu exports.
+ *
+ * Those are special entities, because MenuLinkContent entities
+ * are part of a Menu.
+ *
+ * There are two scenarios:
+ *
+ * 1) A MenuLinkContent edited from /admin/structure/menu/item/{{ID}}/edit
+ *    - This triggers an export with a MenuLinkContent entity and
+ *      "insidePlugin" property with value FALSE.
+ *    - No export with Menu entity is triggered.
+ *    That is a problem because the exporter doesn't care about
+ *    MenuLinkContent entities but it needs to export the whole Menu entity.
+ *
+ * 2) A MenuLinkContent edited from /admin/structure/menu/manage/{{MENU_ID}}
+ *    This is the case when a MenuLinkContent is resorted, disabled/enabled,
+ *    etc.
+ *    - This triggers one or more exports with a MenuLinkContent entity and
+ *      "insidePlugin" property with value TRUE.
+ *    - This also triggers an export with Menu.
+ *    That is not a problem, because the exporter doesn't care about
+ *    MenuLinkContent entities and, unlike the first case, and export with
+ *    a Menu entity is triggered.
+ *
+ * So we need to fix the first case, detecting it to manually return menu
+ * and not MenuLinkContent.
+ *
+ * @param \Drupal\Core\Entity\EntityInterface $entity
+ *   An Entity.
+ *
+ * @return bool
+ */
+function _static_export_isMenuLink(EntityInterface $entity) {
+  if ($entity instanceof MenuLinkContent) {
+    if (!_static_export_access_protected($entity, "insidePlugin")) {
+      return TRUE;
+    }
+  }
+  return FALSE;
+}
+
+/**
+ * Helper method to get access to protected/private class members.
+ *
+ * @param object $object
+ *   An object with protected/private class members.
+ * @param string $prop
+ *   Name of the protected/private class member.
+ *
+ * @return mixed
+ *   The value of the property.
+ */
+function _static_export_access_protected($object, string $prop) {
+  $propertyValue = NULL;
+  try {
+    $reflection = new ReflectionClass($object);
+    $property = $reflection->getProperty($prop);
+    $property->setAccessible(TRUE);
+    $propertyValue = $property->getValue($object);
+  }
+  catch (Throwable $e) {
+  }
+  return $propertyValue;
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for node_form().
+ */
+function static_export_form_node_form_alter(&$form, FormStateInterface $form_state) {
+
+  /** @var \Drupal\static_export\Entity\ExportableEntityManagerInterface $exportableEntityManager */
+  $exportableEntityManager = \Drupal::service('static_export.exportable_entity_manager');
+  $formObject = $form_state->getFormObject();
+  $node = NULL;
+  if ($formObject instanceof EntityFormInterface) {
+    $node = $formObject->getEntity();
+  }
+
+  if ($node && $exportableEntityManager->isExportable($node) && $node->id()) {
+    // Create the group for the fields.
+    $form['static_export_info'] = [
+      '#type' => 'details',
+      '#title' => t('Static export'),
+      '#access' => \Drupal::currentUser()
+        ->hasPermission('view static export node form summary info'),
+      '#open' => FALSE,
+      '#group' => 'advanced',
+      '#tree' => TRUE,
+      '#weight' => -9,
+    ];
+    $date_formatter = \Drupal::service('date.formatter');
+
+    /** @var \Drupal\static_export\Exporter\Type\Entity\Output\Uri\Resolver\EntityExporterUriResolverInterface $exporterUriResolver */
+    $exporterUriResolver = \Drupal::service('static_export.entity_exporter_uri_resolver');
+    $exportedFilePaths = $exporterUriResolver->setEntity($node)->getUris();
+
+    $header = [
+      'path' => t('Path'),
+      'modification_date' => t('Modification date'),
+      'size' => t('Size (bytes)'),
+    ];
+    if (\Drupal::currentUser()->hasPermission('view static export files')) {
+      $header['includes'] = t('Data includes');
+    }
+
+    $options = [];
+    foreach ($exportedFilePaths as $uri) {
+      $exportedUriTarget = $uri->getTarget();
+      $modificationTime = @filemtime($uri);
+      if (\Drupal::currentUser()->hasPermission('view static export files')) {
+        $pathData = [
+          'data' => [
+            // Add a Zero Width Space in each "/" to avoid breaking the table.
+            '#title' => str_replace('/', '/​', $exportedUriTarget),
+            '#type' => 'link',
+            '#attributes' => ['target' => '_blank'],
+            '#url' => Url::fromUri(file_create_url($uri)),
+          ],
+        ];
+      }
+      else {
+        $pathData = $exportedUriTarget;
+      }
+      $size = @filesize($uri);
+      $row = [
+        'path' => $pathData,
+        'modification_date' => $modificationTime ? $date_formatter->format($modificationTime, 'custom', 'Y-m-d H:i:s') : '--',
+        'size' => $size ?: '--',
+      ];
+      if (\Drupal::currentUser()->hasPermission('view static export files')) {
+        $row['includes'] = [
+          'data' => [
+            '#title' => t('view'),
+            '#type' => 'link',
+            '#attributes' => ['target' => '_blank'],
+            '#url' => Url::fromUri(file_create_url($uri), ['query' => ['includes' => TRUE]]),
+          ],
+        ];
+      }
+
+      $options[] = $row;
+    }
+
+    $form['static_export_info']['table'] = [
+      '#type' => 'table',
+      '#header' => $header,
+      '#rows' => $options,
+      '#required' => FALSE,
+      '#multiple' => FALSE,
+      '#empty' => t('No exported files found.'),
+    ];
+
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for node_form().
+ */
+function static_export_form_config_translation_edit_form_alter(&$form, FormStateInterface $form_state) {
+  $form['#submit'][] = 'static_export_do_export_config_entity';
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for node_form().
+ */
+function static_export_form_config_translation_add_form_alter(&$form, FormStateInterface $form_state) {
+  $form['#submit'][] = 'static_export_do_export_config_entity';
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for node_form().
+ */
+function static_export_form_config_translation_delete_form_alter(&$form, FormStateInterface $form_state) {
+  // @todo Remove manually adding 'config_translation_mapper',
+  //   'config_translation_language' and 'config_translation_source_language'
+  //   when https://www.drupal.org/project/drupal/issues/3191335 is moved into
+  //   core.
+  // Drupal\config_translation\Form\ConfigTranslationDeleteForm misses setting
+  // 'config_translation_mapper', 'config_translation_language' and
+  // 'config_translation_source_language', so do it here.
+  $buildInfo = $form_state->getBuildInfo();
+  if (!empty($buildInfo['args'][0])) {
+    $languageManager = \Drupal::service('language_manager');
+    /** @var \Drupal\Core\Routing\RouteMatchInterface $routeMatch */
+    $routeMatch = $buildInfo['args'][0];
+    $pluginId = $routeMatch->getParameter('plugin_id');
+    if ($pluginId) {
+      $configMapperManager = \Drupal::service('plugin.manager.config_translation.mapper');
+      $mapper = $configMapperManager->createInstance($pluginId);
+      $mapper->populateFromRouteMatch($routeMatch);
+      $form_state->set('config_translation_mapper', $mapper);
+
+      // Set translation source language accordingly.
+      $mapperLangcode = $mapper->getLangcode();
+      $sourceLanguage = $languageManager->getLanguage($mapperLangcode);
+      $form_state->set('config_translation_source_language', $sourceLanguage);
+    }
+
+    // Set translation language.
+    $langcode = $routeMatch->getParameter('langcode');
+    if ($langcode) {
+      $language = $languageManager->getLanguage($langcode);
+      if ($language) {
+        $form_state->set('config_translation_language', $language);
+      }
+    }
+  }
+
+  $form['#submit'][] = 'static_export_do_export_config_entity';
+}
+
+/**
+ *
+ */
+function static_export_do_export_config_entity(&$form, FormStateInterface $form_state) {
+  $mapper = $form_state->get('config_translation_mapper');
+  if ($mapper instanceof ConfigEntityMapper) {
+    // Reset internal config factory cache to get fresh data.
+    $configFactory = \Drupal::service('config.factory');
+    foreach ($mapper->getConfigNames() as $name) {
+      $configFactory->reset($name);
+    }
+    $entity = $mapper->getEntity();
+    static_export_entity_update($entity);
+  }
+}
+
+/**
+ * Implements hook_cron().
+ */
+function static_export_cron() {
+  $configFactory = \Drupal::service("config.factory");
+  $fileSystem = \Drupal::service("file_system");
+  $workDir = $configFactory->get("static_export.settings")->get("work_dir");
+  $logDir = $configFactory->get("static_export.settings")->get("log_dir");
+  $maxDaysToKeepLogs = $configFactory->get("static_export.settings")
+    ->get("max_days_to_keep_logs");
+
+  if ($maxDaysToKeepLogs && $logDir) {
+    // Clean logs.
+    $logFiles = glob($logDir . "/*");
+    $now = time();
+    foreach ($logFiles as $file) {
+      if (is_file($file)) {
+        if ($now - filemtime($file) >= 60 * 60 * 24 * $maxDaysToKeepLogs) {
+          $fileSystem->unlink($file);
+        }
+      }
+    }
+  }
+
+  // Keep only the last 10000 lines of commit log.
+  $logFile = $workDir . '/' . FileCollectionWriter::COMMIT_LOG_FILE;
+  $lines = file($logFile);
+  $lines = array_slice($lines, -10000);
+  file_put_contents($logFile, implode($lines), LOCK_EX);
+
+  // Keep only the last 10000 lines of lock executed log.
+  $logFile = $workDir . '/' . FileCollectionWriter::LOCK_EXECUTED_LOG_FILE;
+  $lines = file($logFile);
+  $lines = array_slice($lines, -10000);
+  file_put_contents($logFile, implode($lines), LOCK_EX);
+}
+
+/**
+ * Tells whether export operations for exportable entities are enabled.
+ *
+ * @return bool
+ *   True if export operations for exportable entities are enabled, false
+ *   otherwise.
+ */
+function static_export_are_exportable_entity_operations_enabled(): bool {
+  return \Drupal::service('config.factory')
+      ->get('static_export.settings')
+      ->get('exportable_entity.enabled') ?? FALSE;
+}
+
+/**
+ * Tells whether export operations for configuration objects are enabled.
+ *
+ * @return bool
+ *   True if export operations for configuration objects are enabled, false
+ *   otherwise.
+ */
+function static_export_are_exportable_config_operations_enabled(): bool {
+  return \Drupal::service('config.factory')
+      ->get('static_export.settings')
+      ->get('exportable_config.enabled') ?? FALSE;
+}
+
+/**
+ * Tells whether export operations for locales are enabled.
+ *
+ * @return bool
+ *   True if export operations for locales are enabled, false otherwise.
+ */
+function static_export_are_exportable_locale_operations_enabled(): bool {
+  return \Drupal::service('config.factory')
+      ->get('static_export.settings')
+      ->get('exportable_locale.enabled') ?? FALSE;
+}
+
+/**
+ * Implements hook_file_download().
+ */
+function static_export_file_download($uri) {
+  $scheme = StreamWrapperManager::getScheme($uri);
+  $target = StreamWrapperManager::getTarget($uri);
+  $compressedFilename = ExportDataDownloadController::FILE_NAME . '.' . DirectoryDownloadHelperInterface::COMPRESSED_EXTENSION;
+  $uncompressedFilename = ExportDataDownloadController::FILE_NAME . '.' . DirectoryDownloadHelperInterface::UNCOMPRESSED_EXTENSION;
+  if ($scheme === 'temporary' && in_array($target, [
+      $compressedFilename,
+      $uncompressedFilename,
+    ], TRUE)) {
+    if (\Drupal::currentUser()
+      ->hasPermission('download static export data')) {
+      $disposition = 'attachment; filename="' . $target . '"';
+      return [
+        'Content-disposition' => $disposition,
+      ];
+    }
+    return -1;
+  }
+}

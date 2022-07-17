@@ -1,0 +1,6 @@
+services:
+  static_suite.string_translation.commands:
+    class: Drupal\static_suite\Commands\StringTranslationCommands
+    arguments: [ "@language_manager", "@locale.storage" ]
+    tags:
+      - { name: drush.command }

@@ -1,0 +1,11 @@
+{
+	"name": "drupal/react_webform_backend",
+	"description": "Drupal webform support for Gatsby projects",
+	"type": "drupal-module",
+	"license": "MIT",
+	"require" : {
+	  "drupal/core": "~8.0 || ^9",
+	  "drupal/webform": "^5.0 || ^6.0",
+	  "drupal/jsonapi_extras": "^3.12"
+	}
+  }

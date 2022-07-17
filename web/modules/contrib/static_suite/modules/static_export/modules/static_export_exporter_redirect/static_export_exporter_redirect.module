@@ -1,0 +1,131 @@
+<?php
+/**
+ * @file
+ * Static Export redirect module file.
+ */
+
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\path_alias\PathAliasInterface;
+use Drupal\redirect\Entity\Redirect;
+use Drupal\static_export\Exporter\ExporterPluginInterface;
+use Drupal\static_export\Exporter\Type\Custom\CustomExporterPluginManagerInterface;
+
+
+/**
+ * Implements hook_entity_insert() for Redirect.
+ */
+function static_export_exporter_redirect_redirect_insert(Redirect $redirect) {
+  static_export_exporter_redirect_do_write($redirect);
+}
+
+/**
+ * Implements hook_entity_update() for Redirect.
+ */
+function static_export_exporter_redirect_redirect_update(Redirect $redirect) {
+  static_export_exporter_redirect_do_write($redirect);
+}
+
+/**
+ * Implements hook_entity_delete() for Redirect.
+ */
+function static_export_exporter_redirect_redirect_delete(Redirect $redirect) {
+  static_export_exporter_redirect_do_write($redirect);
+}
+
+/**
+ * Implements hook_entity_insert() for PathAliasInterface.
+ */
+function static_export_exporter_redirect_path_alias_insert(PathAliasInterface $pathAlias) {
+  static_export_exporter_redirect_do_write($pathAlias);
+}
+
+/**
+ * Implements hook_entity_update() for PathAliasInterface.
+ */
+function static_export_exporter_redirect_path_alias_update(PathAliasInterface $pathAlias) {
+  static_export_exporter_redirect_do_write($pathAlias);
+}
+
+/**
+ * Implements hook_entity_delete() for PathAliasInterface.
+ */
+function static_export_exporter_redirect_path_alias_delete(PathAliasInterface $pathAlias) {
+  static_export_exporter_redirect_do_write($pathAlias);
+}
+
+
+/**
+ *
+ * @param EntityInterface $entity
+ *   The redirect that's being created/edited/deleted.
+ */
+function static_export_exporter_redirect_do_write(EntityInterface $entity) {
+  // Early opt-out if STATIC_EXPORT_STOP_LISTENING_TO_CRUD_EVENTS environment
+  // variable is present.
+  if (getenv('STATIC_EXPORT_STOP_LISTENING_TO_CRUD_EVENTS', TRUE)) {
+    return TRUE;
+  }
+  
+  /** @var CustomExporterPluginManagerInterface $customExporterPluginManager */
+  $customExporterPluginManager = \Drupal::service("plugin.manager.static_custom_exporter");
+
+  $isRunningOnCli = \Drupal::service('static_suite.utils')->isRunningOnCli();
+
+  // Honor the value of STATIC_EXPORT_REQUEST_BUILD environmental variable.
+  $requestBuildOverride = getenv('STATIC_EXPORT_REQUEST_BUILD', TRUE);
+  if ($requestBuildOverride) {
+    $requestBuild = filter_var($requestBuildOverride, FILTER_VALIDATE_BOOLEAN);
+  }
+  else {
+    // If running on CLI, do not request a build.
+    $requestBuild = !$isRunningOnCli;
+  }
+
+  /** @var \Drupal\static_export\Exporter\Stack\ExporterStackExecutorInterface $exporterStackExecutor */
+  $exporterStackExecutor = \Drupal::service('static_export.exporter_stack_executor');
+  $redirectExporter = $customExporterPluginManager->createInstance('redirect');
+  $options = [
+    'operation' => [
+      'id' => ExporterPluginInterface::OPERATION_WRITE,
+      'args' => [],
+    ],
+    'request-build' => $requestBuild,
+  ];
+  $exporterStackExecutor->add('redirect', $redirectExporter, $options);
+}
+
+/**
+ * Get default CSV pattern.
+ *
+ * @return string
+ *   The default CSV pattern.
+ */
+function static_export_exporter_redirect_get_default_csv_pattern(): string {
+  return '[redirect_source__path]\t[redirect_redirect__uri]\t[status_code]';
+}
+
+/**
+ * Get CSV tokens available for creating a CSV line pattern.
+ *
+ * @return array
+ *   An array of CSV tokens.
+ */
+function static_export_exporter_redirect_get_csv_tokens(): array {
+  return [
+    'rid',
+    'type',
+    'uuid',
+    'language',
+    'hash',
+    'uid',
+    'redirect_source__path',
+    'redirect_source__path_original',
+    'redirect_source__query',
+    'redirect_redirect__uri',
+    'redirect_redirect__uri_original',
+    'redirect_redirect__title',
+    'redirect_redirect__options',
+    'status_code',
+    'created',
+  ];
+}

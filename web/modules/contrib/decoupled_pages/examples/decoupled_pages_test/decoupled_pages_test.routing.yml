@@ -1,0 +1,24 @@
+decoupled_pages_test.red_example:
+  path: /decoupled_pages/examples/red
+  defaults:
+    _decoupled_page_main: decoupled_pages_test/example_main
+    _decoupled_page_data:
+      foo: 'bar'
+    _decoupled_page_data_provider: decoupled_pages_test.data_provider
+  requirements:
+    _access: 'TRUE'
+  options:
+    _decoupled_page_assets:
+      - decoupled_pages_test/red_text
+
+decoupled_pages_test.blue_example:
+  path: /decoupled_pages/examples/blue
+  defaults:
+    _decoupled_page_main: decoupled_pages_test/example_main
+  requirements:
+    _access: 'TRUE'
+  options:
+    _decoupled_page_assets:
+      - decoupled_pages_test/blue_text
+    _decoupled_page_paths:
+      alternate: /decoupled_pages/examples/blue/alternate

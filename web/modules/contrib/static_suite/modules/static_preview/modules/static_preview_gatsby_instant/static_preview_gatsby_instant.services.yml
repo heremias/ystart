@@ -1,0 +1,31 @@
+services:
+  static_preview_gatsby_instant.controller_wrapper_subscriber:
+    class: Drupal\static_preview_gatsby_instant\EventSubscriber\PreviewControllerWrapperSubscriber
+    arguments: [ '@http_kernel.controller.argument_resolver', '@event_dispatcher', '@static_preview_gatsby_instant.gatsby_mocker', '@plugin.manager.static_builder',  '@static_export.exportable_entity_manager' ]
+    tags:
+      - { name: event_subscriber }
+
+  static_preview_gatsby_instant.gatsby_mocker:
+    class: Drupal\static_preview_gatsby_instant\Mocker\GatsbyMocker
+    arguments: [ "@config.factory", "@current_user", "@language_manager", "@tempstore.private","@plugin.manager.static_builder", "@static_build.static_builder_helper", "@static_export.page_path_uri_resolver", "@static_export.data_include_loader", "@static_preview_gatsby_instant.graphql_node_preview_data_resolver" ]
+
+  static_preview_gatsby_instant.page_data_path_processor:
+    class: Drupal\static_preview_gatsby_instant\PathProcessor\PageDataPathProcessor
+    arguments: [ "@language_manager" ]
+    tags:
+      - { name: path_processor_inbound, priority: 250 }
+
+  static_preview_gatsby_instant.page_html_custom_url_processor:
+    class: Drupal\static_preview_gatsby_instant\PathProcessor\PageHtmlCustomUrlProcessor
+    arguments: [ "@language_manager", "@static_export.page_path_uri_resolver" ]
+    tags:
+      - { name: path_processor_inbound, priority: 250 }
+
+  static_preview_gatsby_instant.route_subscriber:
+    class: Drupal\static_preview_gatsby_instant\Routing\RouteSubscriber
+    tags:
+      - { name: event_subscriber, priority: 250 }
+
+  static_preview_gatsby_instant.graphql_node_preview_data_resolver:
+    class: Drupal\static_preview_gatsby_instant\GraphQL\Data\Resolver\GraphqlNodePreviewDataResolver
+    arguments: [ "@config.factory", "@static_suite.entity_utils", "@static_export_data_resolver_graphql.graphql_query_handler" ]

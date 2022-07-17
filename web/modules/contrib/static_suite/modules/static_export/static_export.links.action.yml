@@ -1,0 +1,11 @@
+entity.exportable_entity.add_form:
+  route_name: 'entity.exportable_entity.add_form'
+  title: 'Add exportable entity'
+  appears_on:
+    - entity.exportable_entity.collection
+
+static_export.exportable_entity.add_form:
+  route_name: 'static_export.exportable_config.add_form'
+  title: 'Add exportable configuration'
+  appears_on:
+    - static_export.exportable_config.collection

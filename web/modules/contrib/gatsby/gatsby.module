@@ -1,0 +1,424 @@
+<?php
+
+/**
+ * @file
+ * Primary hook implementations for the Gatsby module.
+ */
+
+use Drupal\Core\Config\Entity\ConfigEntityInterface;
+use Drupal\Core\Datetime\DrupalDateTime;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\gatsby\PathMapping;
+use Drupal\node\NodeInterface;
+use Drupal\node\Entity\NodeType;
+use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+
+/**
+ * Implements hook_help().
+ */
+function gatsby_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the gatsby module.
+    case 'help.page.gatsby':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Enables Live Preview for Gatsby') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function gatsby_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  // Add Gatsby Preview options to the content type form.
+  if ($form_id == 'node_type_add_form' || $form_id == 'node_type_edit_form') {
+    $entity = $form_state->getFormObject()->getEntity();
+
+    // Make sure the node integration is actually enabled before doing anything.
+    $entity_types = \Drupal::config('gatsby.settings')
+      ->get('supported_entity_types');
+    if (empty($entity_types) || !in_array('node', $entity_types)) {
+      return;
+    }
+
+    // Get settings.
+    $preview_settings = $entity->getThirdPartySetting('gatsby', 'preview');
+    $target_settings = $entity->getThirdPartySetting('gatsby', 'target');
+
+    $form['gatsby'] = [
+      '#title' => t('Gatsby Preview'),
+      '#type' => 'details',
+      '#group' => 'additional_settings',
+    ];
+
+    $form['gatsby']['gatsby_preview'] = [
+      '#type' => 'checkbox',
+      '#title' => t('Enable Gatsby Preview Button'),
+      '#default_value' => !empty($preview_settings),
+      '#description' => t('This will add a Gatsby Preview button to node pages.'),
+    ];
+
+    $form['gatsby']['gatsby_preview_target'] = [
+      '#type' => 'select',
+      '#title' => t('Gatsby Preview Button Target'),
+      '#options' => [
+        'window' => t('New Window'),
+        'sidebar' => t('Sidebar on Node Edit page'),
+      ],
+      '#description' => t('This controls the behavior of the Gatsby preview button.'),
+      '#default_value' => !empty($target_settings) ? $target_settings : [],
+      '#states' => [
+        'visible' => [
+          ':input[name="gatsby_preview"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
+
+    $form['#entity_builders'][] = 'gatsby_preview_node_entity_builder';
+  }
+
+  // Override node edit form.
+  elseif (preg_match('/node_(\w*)_edit_form/', $form_id, $matches)) {
+    $moduleHandler = \Drupal::service('module_handler');
+    if ($moduleHandler->moduleExists('gatsby_endpoints')) {
+      return;
+    }
+
+    // Make sure the node integration is actually enabled before doing anything.
+    $entity_types = \Drupal::config('gatsby.settings')
+      ->get('supported_entity_types');
+    if (empty($entity_types) || !in_array('node', $entity_types)) {
+      return;
+    }
+
+    // Load settings.
+    $entity = $form_state->getFormObject()->getEntity();
+    $entity_type = NodeType::load($entity->bundle());
+    $preview_settings = $entity_type->getThirdPartySetting('gatsby', 'preview');
+    $target_settings = $entity_type->getThirdPartySetting('gatsby', 'target');
+    $server_urls = array_map('trim', explode(',', \Drupal::config('gatsby.settings')->get('server_url')));
+    $server_url = reset($server_urls);
+
+    if (!empty($preview_settings) && !empty($server_url)) {
+      $node = \Drupal::routeMatch()->getParameter('node');
+
+      // Add Gatsby Preview button.
+      $form['actions']['gatsby_preview'] = [
+        '#type' => 'button',
+        '#weight' => 5,
+      ];
+      $form['actions']['gatsby_preview']['#value'] = 'Open Gatsby Preview';
+      $form['actions']['gatsby_preview']['#attributes']['class'] = ['gatsby-preview'];
+
+      // Convert the node revision timestamp into a proper date object so that
+      // it can be properly formatted in RFC 3339 format.
+      // @see \Drupal\serialization\Normalizer\TimestampNormalizer
+      // @see \Drupal\serialization\Normalizer\DateTimeNormalizer::normalize()
+      $date = DrupalDateTime::createFromTimestamp($node->getRevisionCreationTime());
+      $date->setTimezone(new \DateTimeZone('UTC'));
+
+      // Implement "Open Preview" action.
+      $form['actions']['gatsby_preview']['#attached'] = [
+        'drupalSettings' => [
+          'gatsby' => [
+            'server_url' => rtrim($server_url, '/'),
+            'path' => \Drupal::service('gatsby.path_mapping')->getPath($node),
+          ],
+        ],
+      ];
+
+      // Load the preview as a sidebar.
+      if (!empty($target_settings) && $target_settings == 'sidebar') {
+        $form['actions']['gatsby_preview']['#attached']['library'] = [
+          'gatsby/open_preview_sidebar',
+        ];
+      }
+
+      // Load the preview in a separate window.
+      else {
+        $form['actions']['gatsby_preview']['#attached']['drupalSettings']['gatsby']['entity_type'] = 'node';
+        $form['actions']['gatsby_preview']['#attached']['drupalSettings']['gatsby']['entity_id'] = $entity->id();
+
+        // Optional Content Sync support.
+        $contentsync_url = \Drupal::config('gatsby.settings')->get('contentsync_url');
+        if (!empty($contentsync_url)) {
+          // The date is formatted as RFC-3339 so that it looks like this:
+          // 2021-10-28T15:42:29+00:00
+          // @see \Drupal\serialization\Normalizer\TimestampNormalizer
+          $contentsync_url .= '/gatsby-source-drupal/' . $node->id() . '-' . $date->format(\DateTime::RFC3339);
+          $form['actions']['gatsby_preview']['#attached']['drupalSettings']['gatsby']['contentsync_url'] = $contentsync_url;
+        }
+
+        $form['actions']['gatsby_preview']['#attached']['library'] = [
+          'gatsby/open_preview_window',
+        ];
+      }
+    }
+  }
+}
+
+/**
+ * Custom handler for Gatsby preview option.
+ */
+function gatsby_preview_node_entity_builder($entity_type, ConfigEntityInterface $config_entity, &$form, FormStateInterface $form_state) {
+  // Save Preview setting.
+  $config_entity->setThirdPartySetting('gatsby', 'preview', $form_state->getValue('gatsby_preview'));
+  $config_entity->setThirdPartySetting('gatsby', 'target', $form_state->getValue('gatsby_preview_target'));
+}
+
+/**
+ * Implements hook_entity_update().
+ */
+function gatsby_entity_update(EntityInterface $entity) {
+  $gatsbyPreview = \Drupal::service('gatsby.preview');
+
+  // Verify this is a supported entity type.
+  if (!$gatsbyPreview->isSupportedEntity($entity)) {
+    return;
+  }
+
+  // Extra checks for files, which have their own peculiarities.
+  if (!_gatsby_will_process_file($entity)) {
+    return;
+  }
+
+  // Log preview update.
+  \Drupal::service('gatsby.logger')->logEntity($entity, 'update', 'preview');
+
+  // Check to see if we are only logging published build logs.
+  if (\Drupal::config('gatsby.settings')->get('log_published')) {
+    // If we can't determine whether content is published or not, just exit.
+    if (!method_exists($entity, 'isPublished')) {
+      return;
+    }
+
+    // Log build update if entity is published, otherwise add a delete build
+    // log.
+    if ($entity->isPublished()) {
+      \Drupal::service('gatsby.logger')->logEntity($entity, 'update', 'build');
+    }
+    elseif ($entity->original->isPublished()) {
+      // If it's just a draft, we don't want to log it in the builds table.
+      if (!$entity->isDefaultRevision()) {
+        return;
+      }
+      // If an entity is going from published to unpublished, trigger a delete
+      // log to remove that content from Gatsby.
+      else {
+        \Drupal::service('gatsby.logger')->logEntity($entity, 'delete', 'build');
+      }
+    }
+  }
+  else {
+    \Drupal::service('gatsby.logger')->logEntity($entity, 'update', 'build');
+  }
+
+  // Notify Gatsby of the update.
+  $gatsbyPreview->gatsbyPrepareData($entity);
+  drupal_register_shutdown_function('_gatsby_update');
+}
+
+/**
+ * Implements hook_entity_insert().
+ */
+function gatsby_entity_insert(EntityInterface $entity) {
+  $gatsbyPreview = \Drupal::service('gatsby.preview');
+
+  // Verify this is a supported entity type.
+  if (!$gatsbyPreview->isSupportedEntity($entity)) {
+    return;
+  }
+
+  // Extra checks for files, which have their own peculiarities.
+  if (!_gatsby_will_process_file($entity)) {
+    return;
+  }
+
+  // Log preview insert log.
+  \Drupal::service('gatsby.logger')->logEntity($entity, 'insert', 'preview');
+
+  // Check to see if we are only logging published build logs.
+  if (\Drupal::config('gatsby.settings')->get('log_published')) {
+    if (method_exists($entity, 'isPublished') && !$entity->isPublished()) {
+      return;
+    }
+  }
+
+  // Log build insert log.
+  \Drupal::service('gatsby.logger')->logEntity($entity, 'insert', 'build');
+
+  // Notify Gatsby of the new content.
+  $gatsbyPreview->gatsbyPrepareData($entity);
+  drupal_register_shutdown_function('_gatsby_update');
+}
+
+/**
+ * Implements hook_entity_delete().
+ */
+function gatsby_entity_delete(EntityInterface $entity) {
+  $gatsbyPreview = \Drupal::service('gatsby.preview');
+
+  // Verify this is a supported entity type.
+  if (!$gatsbyPreview->isSupportedEntity($entity)) {
+    return;
+  }
+
+  // Extra checks for files, which have their own peculiarities.
+  if (!_gatsby_will_process_file($entity)) {
+    return;
+  }
+
+  // Delete from build and preview logs.
+  \Drupal::service('gatsby.logger')->logEntity($entity, 'delete', 'build');
+  \Drupal::service('gatsby.logger')->logEntity($entity, 'delete', 'preview');
+
+  // Notify Gatsby of the change.
+  $gatsbyPreview->gatsbyPrepareData($entity);
+  drupal_register_shutdown_function('_gatsby_update');
+}
+
+/**
+ * Implements hook_cron().
+ */
+function gatsby_cron() {
+  // Do not delete entities if delete setting is not enabled.
+  if (!\Drupal::config('gatsby.settings')->get('delete_log_entities')) {
+    return;
+  }
+
+  // Make sure a valid expiration setting is set.
+  $expiration = \Drupal::config('gatsby.settings')->get('log_expiration');
+  if (!$expiration) {
+    return;
+  }
+
+  \Drupal::service('gatsby.logger')
+    ->deleteExpiredLoggedEntities(time() - $expiration);
+
+  $last_logtime = \Drupal::service('gatsby.logger')
+    ->getOldestLoggedEntityTimestamp();
+
+  // Set last logtime as current time if there are no log entries.
+  if (!$last_logtime) {
+    $last_logtime = time();
+  }
+
+  // Store the log time of the last log entry in order to validate future syncs.
+  \Drupal::state()
+    ->set('gatsby.last_logtime', $last_logtime);
+}
+
+/**
+ * Determine whether the given file entity should be processed.
+ *
+ * @param \Drupal\Core\Config\Entity\ConfigEntityInterface $entity
+ *   Whether the entity should be processed.
+ *
+ * @return bool
+ *   Whether the file should be processed.
+ */
+function _gatsby_will_process_file(EntityInterface $entity) {
+  // Extra logic for files, which have their own peculiarities.
+  if ($entity->getEntityTypeId() == 'file') {
+    // Ignore files before they are marked "permanent".
+    if ($entity->isTemporary()) {
+      return FALSE;
+    }
+
+    // Private files are ignored by default, but may be published if an option
+    // is enabled.
+    if (substr($entity->getFileUri(), 0, 7) == 'private') {
+      $gatsby_settings = \Drupal::config('gatsby.settings');
+      if (!$gatsby_settings->get('publish_private_files')) {
+        return FALSE;
+      }
+    }
+  }
+
+  return TRUE;
+}
+
+/**
+ * Implements hook_entity_extra_field_info().
+ */
+function gatsby_entity_extra_field_info() {
+  $extra = [];
+  $entity_types = \Drupal::config('gatsby.settings')
+    ->get('supported_entity_types');
+
+  if (!empty($entity_types)) {
+    foreach ($entity_types as $entity_type) {
+      $bundle_info = \Drupal::service('entity_type.bundle.info')->getBundleInfo($entity_type);
+      $entity_type_definition = \Drupal::entityTypeManager()->getDefinition($entity_type);
+      if (count($bundle_info) > 1 || $entity_type_definition->getKey('bundle')) {
+        foreach ($bundle_info as $bundle => $info) {
+          $extra[$entity_type][$bundle]['display']['gatsby_iframe_preview'] = [
+            'label' => t('Gatsby iframe preview'),
+            'description' => t('A preview of this content using the GatsbyJS system, displayed using an iframe.'),
+            'weight' => 100,
+            'visible' => FALSE,
+          ];
+        }
+      }
+      else {
+        $extra[$entity_type][$entity_type_definition->getKey('bundle')]['display']['gatsby_iframe_preview'] = [
+          'label' => t('Gatsby iframe preview'),
+          'description' => t('A preview of this content using the GatsbyJS system, displayed using an iframe.'),
+          'weight' => 100,
+          'visible' => FALSE,
+        ];
+      }
+    }
+  }
+
+  return $extra;
+}
+
+/**
+ * Implements hook_entity_view().
+ */
+function gatsby_entity_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
+  if ($display->getComponent('gatsby_iframe_preview')) {
+    // Don't run hook_entity_view if gatsby_endpoints is enabled.
+    $server_urls = array_map('trim', explode(',', \Drupal::config('gatsby.settings')->get('server_url')));
+    $server_url = reset($server_urls);
+
+    // Skip the rest of the logic if no server URL is defined.
+    if (empty($server_url)) {
+      return;
+    }
+
+    // Render the preview for this entity
+    $gatsby_url = preg_replace('/\/$/', '', $server_url) . \Drupal::service('gatsby.path_mapping')->getPath($entity);
+    $build['gatsby_iframe_preview'] = [
+      '#type' => 'inline_template',
+      '#template' => '<div class="gatsby-iframe-container"><iframe class="gatsby-iframe" src="{{ url }}"></iframe></div>',
+      '#context' => [
+        'url' => $gatsby_url,
+      ],
+      '#attached' => [
+        'library' => [
+          'gatsby/iframe_preview',
+        ],
+      ],
+    ];
+  }
+}
+
+/**
+ * Triggers the update to the Gatsby Preview and Incremental Builds servers.
+ *
+ * @see gatsby_entity_insert()
+ * @see gatsby_entity_update()
+ * @see gatsby_entity_delete()
+ */
+function _gatsby_update() {
+  $gatsbyPreview = \Drupal::service('gatsby.preview');
+  $gatsbyPreview->gatsbyUpdate();
+}

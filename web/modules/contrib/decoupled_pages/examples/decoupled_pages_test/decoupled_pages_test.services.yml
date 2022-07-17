@@ -1,0 +1,5 @@
+services:
+  decoupled_pages_test.data_provider:
+    class: Drupal\decoupled_pages_test\DataProvider
+    tags:
+      - { name: decoupled_pages_data_provider }

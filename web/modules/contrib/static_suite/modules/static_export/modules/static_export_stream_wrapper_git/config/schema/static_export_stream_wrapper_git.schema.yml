@@ -1,0 +1,14 @@
+static_export_stream_wrapper_git.settings:
+  type: config_object
+  label: 'Git File System settings'
+  bmapping:
+    git_inary:
+      type: string
+      label: 'Path to the git binary'
+    repo_dir:
+      type: string
+      label: 'Relative path, from DRUPAL_ROOT, to the directory where the repository is located'
+    data_dir:
+      type: string
+      label: 'Path inside the repository directory'
+

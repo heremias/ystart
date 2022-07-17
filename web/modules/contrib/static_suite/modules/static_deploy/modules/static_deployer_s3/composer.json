@@ -1,0 +1,24 @@
+{
+  "name": "drupal/static_suite/static_build/static_deployer_s3",
+  "description": "Deploys sites built by static_build to AWS S3.",
+  "type": "drupal-module",
+  "homepage": "https://www.drupal.org/project/static_suite",
+  "authors": [
+    {
+      "name": "Alberto Silva",
+      "homepage": "https://www.drupal.org/u/alberto-silva"
+    },
+    {
+      "name": "David Gallego",
+      "homepage": "https://www.drupal.org/u/gallegodavid"
+    }
+  ],
+  "support": {
+    "issues": "https://www.drupal.org/project/issues/static_suite"
+  },
+  "license": "GPL-2.0+",
+  "require": {
+    "asilgag/aws-s3-incremental-deployer": "^1.0"
+  }
+}
+

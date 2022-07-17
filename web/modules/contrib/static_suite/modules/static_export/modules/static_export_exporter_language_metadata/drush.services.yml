@@ -1,0 +1,6 @@
+services:
+  static_export_exporter_language_metadata.commands:
+    class: Drupal\static_export_exporter_language_metadata\Commands\LanguageMetadataCommands
+    arguments: [ "@plugin.manager.static_custom_exporter", "@static_export.file_collection_formatter" ]
+    tags:
+      - { name: drush.command }

@@ -1,0 +1,17 @@
+static_suite.settings:
+  type: config_object
+  label: 'Static suite settings'
+  mapping:
+    cli_allowed_users:
+      type: sequence
+      label: 'List of users allowed to run Static Suite drush commands'
+      sequence:
+        type: string
+        label: 'User name'
+    cli_throw_exception_interactive_tty:
+      type: boolean
+      label: 'Throw an error on interactive TTYs'
+    cli_throw_exception_non_interactive_tty:
+      type: boolean
+      label: 'Throw an error on non-interactive TTYs'
+

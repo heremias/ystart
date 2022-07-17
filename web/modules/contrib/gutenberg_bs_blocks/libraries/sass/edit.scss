@@ -1,0 +1,39 @@
+@import "node_modules/bootstrap/scss/functions";
+@import "node_modules/bootstrap/scss/variables";
+@import "node_modules/bootstrap/scss/mixins";
+
+/* Reset gutenberg style */
+.gutenberg__editor svg path {
+  fill: currentColor;
+}
+
+.wp-block {
+  max-width: none !important;
+}
+
+.block-editor-block-list__layout.is-root-container {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+
+  & > .wp-block {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+}
+
+.editor-styles-wrapper {
+  .block-editor-block-list__block {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+}
+
+[data-type="core/heading"] {
+  margin-top: 0 !important;
+  margin-bottom: $headings-margin-bottom !important;
+}
+
+[data-type="core/paragraph"] {
+  margin-top: 0 !important;
+  margin-bottom: $paragraph-margin-bottom !important;
+}

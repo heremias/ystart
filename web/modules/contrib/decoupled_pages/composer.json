@@ -1,0 +1,13 @@
+{
+    "name": "drupal/decoupled_pages",
+    "description": "Provides a quick and simple way to define new Drupal routes which can be overtaken by a single page application.",
+    "type": "drupal-module",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Gabriel SULLICE",
+            "email": "gabriel@sullice.com"
+        }
+    ],
+    "require": {}
+}

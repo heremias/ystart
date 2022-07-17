@@ -1,0 +1,6 @@
+services:
+  config_partial_export.commands:
+    class: \Drupal\config_partial_export\Commands\ConfigPartialExportCommands
+    arguments: ['@config.manager', '@config.storage', '@config.storage.sync', '@module_handler', '@event_dispatcher', '@lock', '@config.typed', '@module_installer', '@theme_handler', '@string_translation']
+    tags:
+      - { name: drush.command }

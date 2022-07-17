@@ -1,0 +1,7 @@
+static_deploy.settings:
+  title: Deploy - Settings
+  route_name: static_deploy.settings
+  base_route: static_deploy.settings
+
+static_deploy.release_list.live:
+  deriver: Drupal\static_deploy\Plugin\Derivative\ReleaseListTasks

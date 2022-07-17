@@ -1,0 +1,13 @@
+name: Static Builder - Cloud - AWS CodeBuild
+type: module
+description: 'Adds AWS CodeBuild Static Cloud Builder plugin to Static Build'
+package: Static Suite - Static Build
+core_version_requirement: ^9.1
+configure: static_builder_codebuild.settings
+dependencies:
+  - static_suite:static_build
+
+# Information added by Drupal.org packaging script on 2021-10-05
+version: '1.1.0-alpha3'
+project: 'static_suite'
+datestamp: 1633432760

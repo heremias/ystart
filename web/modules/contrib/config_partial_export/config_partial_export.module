@@ -1,0 +1,26 @@
+<?php
+
+/**
+ * @file
+ * Allows site administrators to modify configuration.
+ */
+
+/**
+ * Implements hook_file_download().
+ */
+function config_partial_export_file_download($uri) {
+  $stream_wrapper_manager = \Drupal::service('stream_wrapper_manager');
+  $scheme = $stream_wrapper_manager->getScheme($uri);
+  $target = $stream_wrapper_manager->getTarget($uri);
+  if ($scheme == 'temporary' && $target == 'config_partial.tar.gz') {
+    $request = \Drupal::request();
+    $date = DateTime::createFromFormat('U', $request->server->get('REQUEST_TIME'));
+    $date_string = $date->format('Y-m-d-H-i');
+    $hostname = str_replace('.', '-', $request->getHttpHost());
+    $filename = 'config_partial' . '-' . $hostname . '-' . $date_string . '.tar.gz';
+    $disposition = 'attachment; filename="' . $filename . '"';
+    return array(
+      'Content-disposition' => $disposition,
+    );
+  }
+}

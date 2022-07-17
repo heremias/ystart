@@ -1,0 +1,3 @@
+administer configuration export ignore:
+  title: 'Administer configuration export ignore'
+  restrict access: true

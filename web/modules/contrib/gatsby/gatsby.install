@@ -1,0 +1,132 @@
+<?php
+
+use Drupal\Core\Field\BaseFieldDefinition;
+
+/**
+ * @file
+ * Install, update, and uninstall functions for the gatsby module.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function gatsby_install() {
+  // Gatsby's hook_node_insert must run after all other modules have modified
+  // the entity.
+  module_set_weight('gatsby', 100);
+}
+
+/**
+ * Migrate config from Fastbuilds submodule to the main config
+ * - Uninstall fastbuilds submodule
+ */
+function gatsby_update_20001() {
+  $fastbuilds_settings = \Drupal::config('gatsby_fastbuilds.settings');
+
+  \Drupal::service('config.factory')->getEditable('gatsby.settings')
+    ->set('log_published', $fastbuilds_settings->get('log_published'))
+    ->set('delete_log_entities', $fastbuilds_settings->get('delete_log_entities'))
+    ->set('log_expiration', $fastbuilds_settings->get('log_expiration'))
+    ->save();
+}
+
+/**
+ * Uninstall fastbuilds submodule
+ */
+function gatsby_update_20002() {
+  \Drupal::service('module_installer')->uninstall(['gatsby_fastbuilds']);
+}
+
+/**
+ * Install the JSON:API Extras module
+ */
+function gatsby_update_20003() {
+  \Drupal::service('module_installer')->install(['jsonapi_extras']);
+}
+
+/**
+ * Update the gatsby_log_entity definition to add published column.
+ */
+function gatsby_update_20004() {
+  $entity_manager = \Drupal::entityTypeManager();
+  $update_manager = \Drupal::entityDefinitionUpdateManager();
+
+  // The gatsby_log_entity entity type wasn't loaded yet.
+  if (!$update_manager->getEntityType('gatsby_log_entity')) {
+    $entity_manager->clearCachedDefinitions();
+    $type = $entity_manager->getDefinition('gatsby_log_entity');
+    $update_manager->installEntityType($type);
+  }
+  // The entity type already existed but doesnt have the new "published?" field.
+  else {
+    $field_storage_definition = BaseFieldDefinition::create('boolean')
+      ->setLabel(t('Published?'))
+      ->setDescription(
+        t('This indicates if the entity is published.')
+      )
+      ->setDefaultValue(TRUE)
+      ->setDisplayOptions('view', [
+        'label' => 'above',
+        'type' => 'string',
+        'weight' => -1,
+      ])
+      ->setDisplayOptions('form', [
+        'type' => 'boolean_checkbox',
+        'weight' => -1,
+      ])
+      ->setRequired(TRUE);
+
+    $update_manager->installFieldStorageDefinition('published', 'gatsby_log_entity', 'gatsby_log_entity', $field_storage_definition);
+  }
+}
+
+/**
+ * Update the gatsby_log_entity definition to add the preview field.
+ */
+function gatsby_update_20005() {
+  $update_manager = \Drupal::entityDefinitionUpdateManager();
+  if ($update_manager->getFieldStorageDefinition('preview', 'gatsby_log_entity')) {
+    return \t('Skipping update as the preview field already exists.');
+  }
+
+  $field_storage_definition = BaseFieldDefinition::create('boolean')
+    ->setLabel(t('Preview'))
+    ->setDescription(
+      t('This indicates if the entity is for preview only.')
+    )
+    ->setDefaultValue(TRUE)
+    ->setDisplayOptions('view', [
+      'label' => 'above',
+      'type' => 'string',
+      'weight' => -1,
+    ])
+    ->setDisplayOptions('form', [
+      'type' => 'boolean_checkbox',
+      'weight' => -1,
+    ])
+    ->setRequired(TRUE);
+
+  $update_manager->installFieldStorageDefinition('preview', 'gatsby_log_entity', 'gatsby_log_entity', $field_storage_definition);
+}
+
+/**
+ * Uninstalling the legacy gatsby_instantpreview module.
+ */
+function gatsby_update_20006() {
+  \Drupal::service('module_installer')
+    ->uninstall(['gatsby_instantpreview']);
+}
+
+/**
+ * Rename the "preview_entity_types" setting.
+ */
+function gatsby_update_20007() {
+  $settings = \Drupal::config('gatsby.settings');
+
+  if (!empty($settings)) {
+    \Drupal::service('config.factory')->getEditable('gatsby.settings')
+      ->set('supported_entity_types', $settings->get('preview_entity_types'))
+      ->clear('preview_entity_types')
+      ->save();
+  }
+}

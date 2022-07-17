@@ -1,0 +1,26 @@
+services:
+  # Serves all decoupled pages.
+  controller.decoupled_pages.main:
+    class: Drupal\decoupled_pages\Controller\DecoupledPage
+
+  # Validates and configures decoupled page route definitions.
+  decoupled_pages.routing_event_subscriber:
+    class: Drupal\decoupled_pages\Routing\RoutingEventSubscriber
+    arguments:
+      - '@library.discovery'
+      - '@service_container'
+    tags:
+      - { name: event_subscriber }
+
+  # Sets dynamic data attributes for the root element.
+  decoupled_pages.dataset_enhancer:
+    class: Drupal\decoupled_pages\Routing\DatasetRouteEnhancer
+    tags:
+      - { name: route_enhancer }
+      - { name: service_collector, tag: decoupled_pages_data_provider, call: addProvider}
+
+  # Sets data attributes for the root element based on the route definition.
+  decoupled_pages.route_definition_data_provider:
+    class: Drupal\decoupled_pages\RouteDefinitionDataProvider
+    tags:
+      - { name: decoupled_pages_data_provider }

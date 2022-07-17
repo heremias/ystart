@@ -1,0 +1,19 @@
+<?php
+
+/**
+ * @file
+ * Installation file for Extra CSS JS Module.
+ */
+
+/**
+ * Implements hook_uninstall().
+ */
+function extra_css_js_uninstall() {
+  // Delete active settings.
+  $query = \Drupal::database()->delete('config');
+  $query->condition('name', 'extra_css_js.settings');
+  $query->execute();
+  $query = \Drupal::database()->delete('key_value');
+  $query->condition('name', 'extra_css_js');
+  $query->execute();
+}

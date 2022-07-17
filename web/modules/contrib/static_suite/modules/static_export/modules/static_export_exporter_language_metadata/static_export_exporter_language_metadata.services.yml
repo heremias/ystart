@@ -1,0 +1,6 @@
+services:
+  static_export_exporter_language_metadata.event_subscriber:
+    class: Drupal\static_export_exporter_language_metadata\EventSubscriber\EventSubscriber
+    arguments: [ "@config.factory", "@plugin.manager.static_custom_exporter", "@static_suite.utils", "@static_export.exporter_stack_executor" ]
+    tags:
+      - { name: event_subscriber }

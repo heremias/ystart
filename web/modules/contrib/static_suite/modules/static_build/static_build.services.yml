@@ -1,0 +1,28 @@
+services:
+  static_build.config_overrider:
+    public: false
+    class: Drupal\static_build\Config\ConfigOverrider
+    arguments: [ "@config.factory", "@static_suite.utils" ]
+    tags:
+      - { name: config.factory.override, priority: 2 }
+
+  plugin.manager.static_builder:
+    class: Drupal\static_build\Plugin\StaticBuilderPluginManager
+    parent: default_plugin_manager
+
+  static_build.static_builder_helper:
+    arguments: [ "@plugin.manager.static_builder" ]
+    class: Drupal\static_build\Plugin\StaticBuilderHelper
+
+  static_build.event_subscriber:
+    class: Drupal\static_build\EventSubscriber\EventSubscriber
+    arguments: [ "@config.factory", "@stream_wrapper_manager", "@tempstore.shared", "@plugin.manager.static_builder",  "@static_suite.entity_utils", "@static_suite.utils" ]
+    tags:
+      - { name: event_subscriber }
+
+  static_build.route_subscriber:
+    class: Drupal\static_build\Routing\RouteSubscriber
+    arguments: [ "@plugin.manager.static_builder" ]
+    tags:
+      - { name: event_subscriber }
+

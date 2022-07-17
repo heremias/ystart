@@ -1,0 +1,30 @@
+services:
+  Drupal\cl_components\Component\ComponentDiscovery:
+    arguments:
+      - '@config.factory'
+      - '@cache.component_registry'
+
+  # Twig loader to allow embedding templates with a component identifier.
+  Drupal\cl_components\Component\ComponentLoader:
+    arguments:
+      - '@Drupal\cl_components\Component\ComponentDiscovery'
+      - '@config.factory'
+      - '@module_handler'
+      - '@theme_handler'
+      - '@renderer'
+      - '%twig.config%'
+    tags:
+      - { name: twig.loader, priority: 250 }
+
+  Drupal\cl_components\Twig\TwigExtension:
+    arguments:
+      - '@Drupal\cl_components\Component\ComponentDiscovery'
+    tags:
+      - { name: twig.extension }
+
+  cache.component_registry:
+    class: Drupal\Core\Cache\CacheBackendInterface
+    tags:
+      - { name: cache.bin }
+    factory: ['@cache_factory', 'get']
+    arguments: [component_registry]

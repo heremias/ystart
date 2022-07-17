@@ -1,0 +1,32 @@
+services:
+  plugin.manager.static_deployer:
+    class: Drupal\static_deploy\Plugin\StaticDeployerPluginManager
+    parent: default_plugin_manager
+
+  static_deploy.static_deployer_helper:
+    arguments: [ '@plugin.manager.static_deployer' ]
+    class: Drupal\static_deploy\Plugin\StaticDeployerHelper
+
+  static_deploy.event_subscriber:
+    class: Drupal\static_deploy\EventSubscriber\EventSubscriber
+    arguments:
+      [
+          '@config.factory',
+          '@plugin.manager.static_deployer',
+          '@static_suite.entity_utils',
+      ]
+    tags:
+      - { name: event_subscriber }
+
+  static_deploy.build_release_list.event_subscriber:
+    class: Drupal\static_deploy\EventSubscriber\BuildReleaseListEventSuscriber
+    arguments: [ '@config.factory', '@plugin.manager.static_builder', '@plugin.manager.static_deployer' ]
+    tags:
+      - { name: event_subscriber }
+
+  static_deploy.route_subscriber:
+    class: Drupal\static_deploy\Routing\RouteSubscriber
+    arguments:
+      [ '@plugin.manager.static_builder', '@plugin.manager.static_deployer' ]
+    tags:
+      - { name: event_subscriber }

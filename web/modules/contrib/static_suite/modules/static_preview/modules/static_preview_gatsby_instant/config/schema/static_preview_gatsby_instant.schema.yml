@@ -1,0 +1,11 @@
+# Schema for the configuration files of the static_preview_gatsby_instant module.
+static_preview_gatsby_instant.settings:
+  type: config_object
+  label: 'Static Preview - Gatsby - Instant settings'
+  mapping:
+    run_mode:
+      type: string
+      label: 'Gatsby public dir (run mode for preview component)'
+    preview_component_path:
+      type: string
+      label: 'Preview component path'

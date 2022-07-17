@@ -1,0 +1,6 @@
+services:
+  static_deploy.commands:
+    class: Drupal\static_deploy\Commands\StaticDeployCommands
+    arguments: [ "@config.factory", "@plugin.manager.static_deployer" ]
+    tags:
+      - { name: drush.command }

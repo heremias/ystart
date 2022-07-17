@@ -1,0 +1,12 @@
+static_build.settings:
+  title: Build - Settings
+  route_name: static_build.settings
+  base_route: static_build.settings
+
+static_build.release_list.live:
+  title: Build - Live releases
+  deriver: 'Drupal\static_build\Plugin\Derivative\ReleaseListTasks'
+
+static_build.release_list.preview:
+  title: Build - Preview releases
+  deriver: 'Drupal\static_build\Plugin\Derivative\ReleaseListTasks'

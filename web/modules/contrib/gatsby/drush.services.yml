@@ -1,0 +1,6 @@
+services:
+  gatsby.commands:
+    class: \Drupal\gatsby\Commands\GatsbyFastbuildsCommands
+    arguments: ['@gatsby.logger', '@state']
+    tags:
+      - { name: drush.command }

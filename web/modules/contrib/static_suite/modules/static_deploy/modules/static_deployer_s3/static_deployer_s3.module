@@ -1,0 +1,31 @@
+<?php
+
+/**
+ * @file
+ * Static Deployer AWS S3 module file.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function static_deployer_s3_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.static_deployer_s3':
+      $output = '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t(
+          'Deploys sites built by <a href=":static-build-url">Static Build</a> module to AWS S3. This module is one of the multiple deployers available for <a href=":static-deploy-url">Static Deploy</a>.',
+          [
+            ':static-build-url' => 'https://www.drupal.org/project/static_build',
+            ':static-deploy-url' => 'https://www.drupal.org/project/static_deploy',
+          ]
+        ) . '</p>';
+      $output .= '<h3>' . t('Uses') . '</h3>';
+      $output .= '<dl>';
+      $output .= '<dt>' . t('Deploying your static site') . '</dt>';
+      $output .= '<dd>' . t('Once Static Build module has built your site, it should be deployed to the CDN/hosting service of your choice. This module takes care of that process and automatizes all the required steps.') . '</dd>';
+      $output .= '</dl>';
+      return $output;
+  }
+}

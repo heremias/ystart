@@ -1,0 +1,6 @@
+config_notify.settings:
+  title: 'Notify'
+  description: 'Config notify configuration.'
+  route_name: config_notify.settings
+  parent: config.sync
+  weight: 1000

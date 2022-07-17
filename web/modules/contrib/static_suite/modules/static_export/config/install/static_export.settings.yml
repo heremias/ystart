@@ -1,0 +1,20 @@
+work_dir: /sites/default/export-data/.work
+max_days_to_keep_logs: 10
+uri:
+  scheme: public
+exportable_entity:
+  enabled: false
+  exporter: default_entity
+exportable_config:
+  enabled: false
+  exporter: default_config
+  format:
+  objects_to_export: { }
+  export_when_crud_happens_on_cli: false
+  request_build_when_crud_exports_on_cli: false
+exportable_locale:
+  enabled: false
+  exporter: default_locale
+  format:
+  export_when_crud_happens_on_cli: true
+  request_build_when_crud_exports_on_cli: false

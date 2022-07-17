@@ -1,0 +1,59 @@
+gatsby.settings:
+  type: config_object
+  label: 'Gatsby settings'
+  mapping:
+    server_url:
+      type: uri
+      label: 'Server URL'
+    preview_callback_url:
+      type: uri
+      label: 'Preview callback URL'
+    path_mapping:
+      type: string
+      label: 'Path Mapping'
+    incrementalbuild_url:
+      type: uri
+      label: 'Incrmental build URL'
+    contentsync_url:
+      type: uri
+      label: 'Content Sync URL'
+    build_published:
+      type: boolean
+      label: 'Build published'
+    log_json:
+      type: boolean
+      label: 'Log JSON'
+    supported_entity_types:
+      type: sequence
+      label: 'Supported entity types'
+      sequence:
+        type: string
+    publish_private_files:
+      type: boolean
+      label: 'Publish Private Files'
+    log_published:
+      type: boolean
+      label: 'Only log entities for published content'
+    fastbuilds_preview:
+      type: boolean
+      label: 'Integrate Fastbuilds with Cloud Preview'
+    delete_log_entities:
+      type: boolean
+      label: 'Delete Old Gatsby Fastbuilds Log Entities'
+    log_expiration:
+      type: string
+      label: 'Fastbuilds Log Expiration'
+    preview_target:
+      type: string
+      label: 'Preview target'
+
+node.type.*.third_party.gatsby:
+  type: mapping
+  label: 'Gatsby node-type settings'
+  mapping:
+    preview:
+      type: boolean
+      label: 'Enable preview'
+    target:
+      type: string
+      label: 'Preview target'

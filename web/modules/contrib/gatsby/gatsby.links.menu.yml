@@ -1,0 +1,5 @@
+gatsby.gatsby_admin_form:
+  title: 'Gatsby integration'
+  route_name: gatsby.gatsby_admin_form
+  description: 'Configure Live Preview and Incremental Builds in Gatsby.'
+  parent: system.admin_config_services

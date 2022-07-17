@@ -1,0 +1,12 @@
+name: Gutenberg Bootstrap Blocks
+type: module
+description: Provides new Bootstrap blocks to Gutenberg editor like container, row, column.
+package: Gutenberg Blocks
+core_version_requirement: ^8 || ^9
+dependencies:
+  - gutenberg
+
+# Information added by Drupal.org packaging script on 2020-08-10
+version: '1.0.0-rc1'
+project: 'gutenberg_bs_blocks'
+datestamp: 1597051712

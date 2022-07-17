@@ -1,0 +1,15 @@
+name: Decoupled Pages Test Module
+description: Tests the Decoupled Pages module and provides examples.
+package: Decoupled
+
+type: module
+core: 8.x
+core_version_requirement: ^8 || ^9
+
+dependencies:
+  - decoupled_pages:decoupled_pages
+
+# Information added by Drupal.org packaging script on 2020-10-30
+version: '8.x-1.0'
+project: 'decoupled_pages'
+datestamp: 1604083597

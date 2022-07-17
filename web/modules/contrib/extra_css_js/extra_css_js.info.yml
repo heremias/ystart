@@ -1,0 +1,11 @@
+name: Extra CSS and JS
+type: module
+description: Provide Extra Css and JS
+core: 8.x
+core_version_requirement: ^8 || ^9
+configure: extra_css_js.admin_settings
+
+# Information added by Drupal.org packaging script on 2020-08-24
+version: '8.x-2.2'
+project: 'extra_css_js'
+datestamp: 1598268907

@@ -1,0 +1,14 @@
+name: XML output formatter for Static Export
+description: An output formatter that transforms raw data from Static Export into XML.
+type: module
+package: Static Suite - Static Export
+core_version_requirement: ^9.1
+configure: static_export_output_formatter_xml.settings
+dependencies:
+  - static_suite:static_export
+
+
+# Information added by Drupal.org packaging script on 2021-10-05
+version: '1.1.0-alpha3'
+project: 'static_suite'
+datestamp: 1633432760

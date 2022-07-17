@@ -1,0 +1,21 @@
+{
+    "name": "drupal/config_notify",
+    "description": "Send different notifications based on the status of the configuration.",
+    "type": "drupal-module",
+    "license": "GPL-2.0+",
+    "homepage": "https://drupal.org/project/config_notify",
+    "authors": [
+        {
+            "name": "Fran Garcia (fjgarlin)",
+            "role": "Maintainer"
+        }
+    ],
+    "minimum-stability": "dev",
+    "support": {
+        "issues": "https://www.drupal.org/project/issues/config_notify",
+        "source": "http://cgit.drupalcode.org/config_notify"
+    },
+    "require": {
+        "composer/installers": "^1.2"
+    }
+}

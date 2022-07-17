@@ -1,0 +1,29 @@
+# Schema for the configuration files of the static_deploy module.
+static_deploy.settings:
+  type: config_object
+  label: 'Static deploy settings'
+  mapping:
+    deployers:
+      type: sequence
+      label: 'List of static deployers'
+      sequence:
+        type: string
+        label: 'Static deployer'
+    sync:
+      type: boolean
+      label: 'Execute synchronous deploys from web-server'
+    semaphore_timeout:
+      type: integer
+      label: 'Timeout for deploy semaphores'
+    toolbar:
+      type: boolean
+      label: 'Show deployment progress in toolbar'
+    env:
+      type: sequence
+      label: 'Environment variables'
+      sequence:
+        type: string
+        label: 'Environment variable'
+    drush_options:
+      type: string
+      label: 'Drush options'

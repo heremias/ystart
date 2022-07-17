@@ -1,0 +1,7 @@
+static_export_output_formatter_xml.settings:
+  type: config_object
+  label: 'Settings for XML output formatter'
+  mapping:
+    pretty_print:
+      type: boolean
+      label: 'Pretty-print XML data'

@@ -1,0 +1,15 @@
+{
+  "name": "drupal/static_suite/static_export/static_export_exporter_redirect",
+  "description": "Export redirect rules from Redirect contributed module using a custom exporter.",
+  "type": "drupal-drush",
+  "require": {
+    "php": ">=7.1.0"
+  },
+  "extra": {
+    "drush": {
+      "services": {
+        "drush.services.yml": "^9"
+      }
+    }
+  }
+}

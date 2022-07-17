@@ -1,0 +1,27 @@
+administer gatsby:
+  title: 'Administer Gatsby settings'
+  description: 'Administer configuration settings for the Gatsby module.'
+  restrict access: TRUE
+
+add gatsby log entity entities:
+  title: 'Create new Gatsby log entity entities'
+
+administer gatsby log entity entities:
+  title: 'Administer Gatsby log entity entities'
+  description: 'Allow to access the administration form to configure Gatsby log entity entities.'
+  restrict access: TRUE
+
+delete gatsby log entity entities:
+  title: 'Delete Gatsby log entity entities'
+
+edit gatsby log entity entities:
+  title: 'Edit Gatsby log entity entities'
+
+sync gatsby fastbuild log entities:
+  title: 'Sync Gatsby Fastbuild log entities'
+
+sync gatsby fastbuild preview log entities:
+  title: 'Sync Gatsby Fastbuild preview log entities'
+
+view gatsby log entity entities:
+  title: 'View Gatsby log entity entities'

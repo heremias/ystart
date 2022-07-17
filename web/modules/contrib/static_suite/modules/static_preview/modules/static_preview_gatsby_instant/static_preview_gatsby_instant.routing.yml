@@ -1,0 +1,25 @@
+static_preview_gatsby_instant.settings:
+  path: '/admin/config/static/preview/gatsby/instant'
+  defaults:
+    _form: \Drupal\static_preview_gatsby_instant\Form\SettingsForm
+    _title: 'Static Preview - Gatsby - Instant: Settings'
+  requirements:
+    _permission: 'administer site configuration'
+
+static_preview_gatsby_instant.page-data-resolver:
+  path: '/api/static/preview/gatsby/instant/page-data-resolver/{pagePath}'
+  defaults:
+    _controller: '\Drupal\static_preview_gatsby_instant\Controller\PageDataResolverController::pageDataResolver'
+    _title: 'Gatsby page data resolver'
+    _disable_route_normalizer: true
+  requirements:
+    _permission: 'access content'
+
+static_preview_gatsby_instant.page-html-resolver:
+  path: '/api/static/preview/gatsby/instant/page-html-resolver/{pagePath}'
+  defaults:
+    _controller: '\Drupal\static_preview_gatsby_instant\Controller\PageHtmlCustomUrlResolverController::pageHtmlResolver'
+    _title: 'Gatsby custom url page HTML resolver'
+    _disable_route_normalizer: true
+  requirements:
+    _permission: 'access content'

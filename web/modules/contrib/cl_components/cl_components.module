@@ -1,0 +1,42 @@
+<?php
+
+/**
+ * @file
+ * Module implementation file.
+ */
+
+use Drupal\cl_components\Component\Component;
+use Drupal\cl_components\Component\ComponentDiscovery;
+
+/**
+ * @file
+ * Module implementation file.
+ */
+
+/**
+ * Implements hook_library_info_build().
+ */
+function cl_components_library_info_build() {
+  // Iterate over the components' directory to find all the components.
+  $component_repository = \Drupal::service(ComponentDiscovery::class);
+  assert($component_repository instanceof ComponentDiscovery);
+  $components = $component_repository->findAll();
+  $libraries = array_reduce(
+    $components,
+    function (array $libraries, Component $component) use ($component_repository) {
+      $library = $component_repository->libraryFromComponent($component);
+      if (empty($library)) {
+        return $libraries;
+      }
+      return array_merge($libraries, [$component->getId() => $library]);
+    },
+    []
+  );
+  $libraries['all'] = [
+    'dependencies' => array_map(
+      fn (Component $component) => $component->getLibraryName(),
+      $components
+    ),
+  ];
+  return $libraries;
+}

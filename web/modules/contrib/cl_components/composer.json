@@ -1,0 +1,21 @@
+{
+    "name": "drupal/cl_components",
+    "description": "Component library using Storybook for the Hybrid Cloud team at IBM.",
+    "type": "drupal-module",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Mateu Aguiló Bosch",
+            "email": "mateu@mateuaguilo.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=7.4",
+        "ext-json": "*",
+        "justinrainbow/json-schema": "^5.2.11"
+    },
+    "suggest": {
+        "league/commonmark": "^2"
+    }
+}

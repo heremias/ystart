@@ -1,0 +1,82 @@
+<?php
+
+/**
+ * @file
+ * Static Build install file.
+ */
+
+use Drupal\Core\Url;
+use Drupal\static_build\Plugin\StaticBuilderPluginInterface;
+
+/**
+ * Implements hook_requirements().
+ */
+function static_build_requirements($phase) {
+  $requirements = [];
+
+  if ($phase === 'runtime') {
+    /** @var \Drupal\Core\Config\ImmutableConfig $config */
+    $config = Drupal::service('config.factory')->get('static_build.settings');
+    $staticBuilderPluginManager = Drupal::service('plugin.manager.static_builder');
+    if ($config->get('base_dir')) {
+      $errorGroups = [];
+      $localDefinitions = $staticBuilderPluginManager->getLocalDefinitions();
+      $cloudDefinitions = $staticBuilderPluginManager->getCloudDefinitions();
+      if (is_array($localDefinitions)) {
+        foreach (array_keys($localDefinitions) as $localBuilderId) {
+          $localStaticBuilderLiveErrors = Drupal::service('plugin.manager.static_builder')
+            ->validateAllDirsStructure(
+              $localBuilderId,
+              ['run-mode' => StaticBuilderPluginInterface::RUN_MODE_LIVE],
+            );
+          if (count($localStaticBuilderLiveErrors) > 0) {
+            $errorGroups[] = $localStaticBuilderLiveErrors;
+          }
+          $localStaticBuilderPreviewErrors = Drupal::service('plugin.manager.static_builder')
+            ->validateAllDirsStructure(
+              $localBuilderId,
+              ['run-mode' => StaticBuilderPluginInterface::RUN_MODE_PREVIEW],
+            );
+          if (count($localStaticBuilderPreviewErrors) > 0) {
+            $errorGroups[] = $localStaticBuilderPreviewErrors;
+          }
+        }
+      }
+      if (is_array($cloudDefinitions)) {
+        foreach (array_keys($cloudDefinitions) as $cloudBuilderId) {
+          $cloudStaticBuilderLiveErrors = Drupal::service('plugin.manager.static_builder')
+            ->validateAllDirsStructure(
+              $cloudBuilderId,
+              ['run-mode' => StaticBuilderPluginInterface::RUN_MODE_LIVE],
+            );
+          if (count($cloudStaticBuilderLiveErrors) > 0) {
+            $errorGroups[] = $cloudStaticBuilderLiveErrors;
+          }
+        }
+      }
+
+      if (count($errorGroups) > 0) {
+        $translatedErrors = [];
+        foreach ($errorGroups as $errorGroup) {
+          foreach ($errorGroup as $error) {
+            $translatedErrors[] = $error;
+          }
+        }
+
+        $requirements['static_build'] = [
+          'title' => 'Static Build',
+          'value' => t('Missing directories and/or permissions'),
+          'description' => [
+            '#markup' => implode('<br/>', $translatedErrors) . '<br/>' . t('See <a href="@url">configuration page</a> for more information.', [
+              '@url' => Url::fromRoute('static_build.settings')
+                ->toString(),
+            ]),
+          ],
+          'severity' => REQUIREMENT_ERROR,
+        ];
+      }
+    }
+  }
+
+  return $requirements;
+}

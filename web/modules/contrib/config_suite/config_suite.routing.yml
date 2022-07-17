@@ -1,0 +1,10 @@
+
+config_suite.config_suite_form:
+  path: '/admin/config/config_suite/admin_settings'
+  defaults:
+    _form: '\Drupal\config_suite\Form\AdminSettingsForm'
+    _title: 'Import and Export your configuration, or automate the configuration workflow.'
+  requirements:
+    _permission: 'administer config suite'
+  options:
+    _admin_route: TRUE

@@ -1,0 +1,6 @@
+services:
+  sfc.commands:
+    class: \Drupal\sfc\Commands\ComponentCommands
+    arguments: ['@plugin.manager.single_file_component']
+    tags:
+      - { name: drush.command }

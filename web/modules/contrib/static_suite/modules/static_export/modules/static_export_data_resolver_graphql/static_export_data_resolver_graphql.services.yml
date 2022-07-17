@@ -1,0 +1,17 @@
+services:
+  static_export_data_resolver_graphql.config_overrider:
+    public: false
+    class: Drupal\static_export_data_resolver_graphql\Config\ConfigOverrider
+    arguments: [ "@config.factory", "@static_suite.utils" ]
+    tags:
+      - { name: config.factory.override, priority: 1 }
+
+  static_export_data_resolver_graphql.exportable_entity_list_subscriber:
+    class: Drupal\static_export_data_resolver_graphql\EventSubscriber\ExportableEntityListEventSubscriber
+    arguments: [ "@config.factory" ]
+    tags:
+      - { name: event_subscriber }
+
+  static_export_data_resolver_graphql.graphql_query_handler:
+    class: Drupal\static_export_data_resolver_graphql\GraphqlQueryHandler
+    arguments: [ '@current_user', '@account_switcher', '@config.factory', '@language_manager', '@graphql.query_processor', "@static_suite.entity_utils" ]

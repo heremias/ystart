@@ -1,0 +1,22 @@
+{
+  "name": "drupal/config_suite",
+  "type": "drupal-module",
+  "description": "Config Suite is a set of improvements to configuration sync to make it automatic and easier to work with.",
+  "license": "GPL-2.0-or-later",
+  "authors": [
+  {
+    "name": "Greg Boggs",
+    "homepage": "https://www.drupal.org/u/greg-boggs",
+    "role": "Maintainer"
+  }
+  ],
+  "homepage": "https://www.drupal.org/project/config_suite",
+  "minimum-stability": "dev",
+  "support": {
+    "issues": "https://www.drupal.org/project/issues/config_suite",
+    "source": "http://cgit.drupalcode.org/config_suite"
+  },
+  "require": {
+    "drupal/core": "^8 || ^9"
+  }
+}

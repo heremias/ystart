@@ -1,0 +1,8 @@
+automatic_import: TRUE
+automatic_export: TRUE
+dependencies:
+  module:
+    - config_suite
+  enforced:
+    module:
+      - config_suite

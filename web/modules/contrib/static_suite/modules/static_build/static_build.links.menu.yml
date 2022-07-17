@@ -1,0 +1,20 @@
+static_build.settings:
+  title: Static Build
+  parent: static_suite.settings
+  description: Manage Static Build settings.
+  route_name: static_build.settings
+  weight: 20
+
+static_build.reports.main:
+  title: Static build
+  parent: static_suite.admin_reports
+  description: Static build reports.
+  route_name: static_build.admin_reports
+
+static_build.release_list.live:
+  title: LIVE releases
+  deriver: 'Drupal\static_build\Plugin\Derivative\ReleaseListMenuItems'
+
+static_build.release_list.preview:
+  title: PREVIEW releases
+  deriver: 'Drupal\static_build\Plugin\Derivative\ReleaseListMenuItems'

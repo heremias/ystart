@@ -1,0 +1,5 @@
+static_builder_codebuild.settings:
+  title: AWS Codebuild Static Builder
+  parent: static_build.settings
+  description: Manage Static Build settings.
+  route_name: static_builder_codebuild.settings

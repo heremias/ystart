@@ -1,0 +1,109 @@
+static_export.settings:
+  type: config_object
+  label: 'Static export settings'
+  mapping:
+    work_dir:
+      type: string
+      label: 'Work directory path'
+    max_days_to_keep_logs:
+      type: integer
+      label: 'Maximum days to keep log files'
+    uri:
+      type: mapping
+      label: 'URI settings'
+      mapping:
+        scheme:
+          type: string
+          label: 'URI scheme for exported files'
+    exportable_languages:
+      type: sequence
+      label: 'Exportable languages'
+      sequence:
+        type: string
+        label: 'Exportable language'
+    exportable_entity:
+      type: mapping
+      label: 'Exportable entities'
+      mapping:
+        enabled:
+          type: boolean
+          label: 'Enabled'
+        exporter:
+          type: string
+          label: 'Exporter to use when exporting entities'
+    exportable_config:
+      type: mapping
+      label: 'Exportable configuration'
+      mapping:
+        enabled:
+          type: boolean
+          label: 'Enabled'
+        exporter:
+          type: string
+          label: 'Exporter to use when exporting configuration data'
+        objects_to_export:
+          type: sequence
+          label: 'List of config objects to export'
+          sequence:
+            type: string
+            label: 'Config object to export'
+        format:
+          type: string
+          label: 'Export format for exportable configuration'
+        export_when_crud_happens_on_cli:
+          type: boolean
+          label: 'Export configurations when a CRUD operation happens on CLI'
+        request_build_when_crud_exports_on_cli:
+          type: boolean
+          label: 'Request a build when a CRUD operation exports configurations on CLI'
+    exportable_locale:
+      type: mapping
+      label: 'Exportable locales'
+      mapping:
+        enabled:
+          type: boolean
+          label: 'Enabled'
+        exporter:
+          type: string
+          label: 'Exporter to use when exporting locales data'
+        format:
+          type: string
+          label: 'Export format for exportable locales'
+        export_when_crud_happens_on_cli:
+          type: boolean
+          label: 'Export locales when a CRUD operation happens on CLI'
+        request_build_when_crud_exports_on_cli:
+          type: boolean
+          label: 'Request a build when a CRUD operation exports locales on CLI'
+
+static_export.exportable_entity.*:
+  type: config_entity
+  label: 'Static Export entities config'
+  mapping:
+    id:
+      type: string
+      label: 'ID'
+    label:
+      type: label
+      label: 'Label'
+    directory:
+      type: string
+      label: 'Export directory'
+    filename:
+      type: string
+      label: 'Export file name'
+    format:
+      type: string
+      label: 'Export format'
+    export_referencing_entities:
+      type: boolean
+      label: 'Export referencing entities'
+    export_when_crud_happens_on_cli:
+      type: boolean
+      label: 'Export data when a CRUD operation happens on CLI'
+    request_build_when_crud_exports_on_cli:
+      type: boolean
+      label: 'Request a build when a CRUD operation exports data on CLI'
+    is_statified_page:
+      type: boolean
+      label: 'Tells whether this entity is a statified page'

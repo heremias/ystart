@@ -1,0 +1,7 @@
+static_export_exporter_redirect.settings:
+  path: '/admin/config/static/export/custom/redirect'
+  defaults:
+    _form: \Drupal\static_export_exporter_redirect\Form\SettingsForm
+    _title: 'Settings for Redirect exporter'
+  requirements:
+    _permission: 'administer site configuration'

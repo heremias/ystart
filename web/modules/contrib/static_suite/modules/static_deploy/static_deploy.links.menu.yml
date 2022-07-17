@@ -1,0 +1,15 @@
+static_deploy.settings:
+  title: Static Deploy
+  parent: static_suite.settings
+  description: Manage Static Deploy settings.
+  route_name: static_deploy.settings
+  weight: 40
+
+static_deploy.reports.main:
+  title: Static deploy
+  parent: static_suite.admin_reports
+  description: Static deploy reports.
+  route_name: static_deploy.admin_reports
+
+static_deploy.release_list.live:
+  deriver: 'Drupal\static_deploy\Plugin\Derivative\ReleaseListMenu'

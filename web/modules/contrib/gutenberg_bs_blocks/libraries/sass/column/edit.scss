@@ -1,0 +1,84 @@
+@import "node_modules/bootstrap/scss/functions";
+@import "node_modules/bootstrap/scss/variables";
+@import "node_modules/bootstrap/scss/mixins";
+
+@mixin make-gutenberg-grid($columns: $grid-columns, $gutter: $grid-gutter-width, $breakpoints: $grid-breakpoints) {
+  // Common properties for all breakpoints
+  %grid-column {
+    position: relative;
+    width: 100%;
+    padding-right: $gutter / 2;
+    padding-left: $gutter / 2;
+  }
+
+  [data-type="bootstrap/column"] {
+    @extend %grid-column;
+
+    &:not([data-offset]):not([data-offset-sm]):not([data-offset-md]):not([data-offset-lg]):not([data-offset-xl]) {
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+    }
+
+    & > .block-editor-inner-blocks > .block-editor-block-list__layout > .block-list-appender {
+      margin: 0;
+    }
+
+    &[data-alignment="top"] {
+      align-self: flex-start;
+    }
+
+    &[data-alignment="center"] {
+      align-self: center;
+    }
+
+    &[data-alignment="bottom"] {
+      align-self: flex-end;
+    }
+
+    @each $breakpoint in map-keys($breakpoints) {
+      $infix: breakpoint-infix($breakpoint, $breakpoints);
+
+      @include media-breakpoint-up($breakpoint, $breakpoints) {
+        // Provide basic `.col-{bp}` classes for equal-width flexbox columns
+        &[data-size#{$infix}="0"] {
+          flex-basis: 0;
+          flex-grow: 1;
+          max-width: 100%;
+        }
+
+        &[data-size#{$infix}="auto"] {
+          @include make-col-auto();
+        }
+
+        @if $columns > 0 {
+          @for $i from 1 through $columns {
+            &[data-size#{$infix}="#{$i}"] {
+              @include make-col($i, $columns);
+            }
+          }
+        }
+
+        &[data-order#{$infix}="-1"] { order: -1; }
+
+        &[data-order#{$infix}="13"] { order: $columns + 1; }
+
+        @for $i from 0 through $columns {
+          &[data-order#{$infix}="#{$i}"] { order: $i; }
+        }
+
+        @if $columns > 0 {
+          // `$columns - 1` because offsetting by the width of an entire row isn't possible
+          @for $i from 0 through ($columns - 1) {
+            @if not ($infix == "" and $i == 0) { // Avoid emitting useless .offset-0
+              &[data-offset#{$infix}="#{$i}"] {
+                @include make-col-offset($i, $columns);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+@include make-gutenberg-grid();

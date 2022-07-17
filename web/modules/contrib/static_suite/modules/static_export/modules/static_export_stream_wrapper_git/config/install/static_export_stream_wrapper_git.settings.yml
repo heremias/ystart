@@ -1,0 +1,3 @@
+git_binary: /usr/bin/git
+repo_dir: /sites/default/export-data-git
+data_dir: /

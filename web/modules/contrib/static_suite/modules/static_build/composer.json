@@ -1,0 +1,15 @@
+{
+  "name": "drupal/static_suite/static_build",
+  "description": "Integrates various Static Builders (Gatsby, Hugo, etc) into Drupal.",
+  "type": "drupal-drush",
+  "require": {
+    "php": ">=7.1.0"
+  },
+  "extra": {
+    "drush": {
+      "services": {
+        "drush.services.yml": "^9"
+      }
+    }
+  }
+}

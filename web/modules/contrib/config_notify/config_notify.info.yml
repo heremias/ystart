@@ -1,0 +1,13 @@
+name: 'Config Notify'
+type: module
+description: 'Send different notifications based on the status of the configuration.'
+core_version_requirement: ^8.8 || ^9 || ^10
+package: 'Config'
+configure: config_notify.settings
+dependencies:
+    - drupal:config
+
+# Information added by Drupal.org packaging script on 2022-06-16
+version: '8.x-1.9'
+project: 'config_notify'
+datestamp: 1655366133

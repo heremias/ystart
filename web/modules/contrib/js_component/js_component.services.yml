@@ -1,0 +1,9 @@
+services:
+  plugin.manager.js_component:
+    class: \Drupal\js_component\JSComponentManager
+    arguments: ["@container.namespaces", "@module_handler", "@theme_handler", "@cache.discovery", "@typed_data_manager"]
+
+  js_component.build.event_subscriber:
+    class: Drupal\js_component\EventSubscriber\JSComponentBuildEventSubscribe
+    tags:
+      - { name: event_subscriber }

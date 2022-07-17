@@ -1,0 +1,11 @@
+type: module
+name: Config Token UI
+description: UI for Config Token module
+core: 8.x
+dependencies:
+- config_token:config_token
+
+# Information added by Drupal.org packaging script on 2020-12-04
+version: '8.x-1.3'
+project: 'config_token'
+datestamp: 1607044469

@@ -1,0 +1,7 @@
+static_export_stream_wrapper_git.settings:
+  path: '/admin/config/static/export/stream-wrappers/static-git'
+  defaults:
+    _form: \Drupal\static_export_stream_wrapper_git\Form\SettingsForm
+    _title: 'Settings for static-git stream wrapper'
+  requirements:
+    _permission: 'administer site configuration'

@@ -1,0 +1,7 @@
+extra_css_js.admin_settings:
+  path: '/admin/config/content/extra-css-js'
+  defaults:
+    _form: '\Drupal\extra_css_js\Form\SettingsForm'
+    _title: 'Extra CSS JS settings'
+  requirements:
+    _permission: 'administer extra css js'

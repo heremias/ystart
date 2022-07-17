@@ -1,0 +1,11 @@
+# Schema for the configuration files of the static_deployer_s3 module.
+static_deployer_s3.settings:
+  type: config_object
+  label: 'Static Deployer S3 settings'
+  mapping:
+    bucket:
+      type: string
+      label: 'AWS S3 Bucket name'
+    region:
+      type: string
+      label: 'AWS Region'

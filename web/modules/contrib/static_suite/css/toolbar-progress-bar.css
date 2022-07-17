@@ -1,0 +1,94 @@
+/**
+ * @file
+ *
+ * Styling for toolbar progress bar.
+ */
+#toolbar-administration .toolbar-progress-bar * {
+  box-sizing: unset;
+}
+
+.toolbar-progress-bar {
+  overflow: hidden;
+  margin: 0.5em 0 0 0;
+  padding: 0.4em 0.6em;
+  background-size: auto 20px;
+  font-weight: bold;
+  display: none;
+}
+
+.toolbar-progress-bar .progress__label,
+.toolbar-progress-bar .progress__percentage,
+.toolbar-progress-bar .progress__description {
+  display: none;
+}
+
+.toolbar-progress-bar .progress__track {
+  margin: 0;
+  height: 12px;
+}
+
+.toolbar-progress-bar .progress__track .progress__bar {
+  height: 12px;
+}
+
+@media only screen and (min-width: 40em) {
+  .toolbar-progress-bar {
+    margin-left: 1em;
+    color: #555;
+    border-color: #f4daa6;
+    border-radius: 4px;
+    background-color: #fdf8ed;
+  }
+
+  .progress__builder_label {
+    display: inline-block;
+    padding-right: 0.5em;
+    border-right: 2px solid #555;
+  }
+
+  .toolbar-progress-bar > .progress {
+    display: inline-block;
+  }
+
+  .toolbar-progress-bar #updateprogress,
+  .toolbar-progress-bar [data-drupal-progress] {
+    display: inline-flex;
+  }
+
+  .toolbar-progress-bar .progress .progress > div,
+  .toolbar-progress-bar .finished {
+    margin: 0 0.3em;
+  }
+
+  .toolbar-progress-bar .finished a {
+    display: inline;
+  }
+
+  .toolbar-progress-bar .progress .progress .progress__percentage {
+    margin-right: 0;
+  }
+
+  .toolbar-progress-bar .progress__label,
+  .toolbar-progress-bar .progress__description,
+  .toolbar-progress-bar .progress__percentage {
+    display: block;
+    overflow: hidden;
+    font-size: small;
+  }
+
+  .toolbar-progress-bar .progress__label {
+    order: 1;
+  }
+
+  .toolbar-progress-bar .progress__track {
+    order: 2;
+  }
+
+  .toolbar-progress-bar .progress__description {
+    order: 3;
+  }
+
+  .toolbar-progress-bar .progress__percentage {
+    order: 4;
+  }
+}

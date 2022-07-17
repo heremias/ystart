@@ -1,0 +1,18 @@
+services:
+  static_export_stream_wrapper_git.config_overrider:
+    public: false
+    class: Drupal\static_export_stream_wrapper_git\Config\ConfigOverrider
+    arguments: [ "@config.factory", "@static_suite.utils" ]
+    tags:
+      - { name: config.factory.override, priority: 1 }
+
+  stream_wrapper.static_git:
+    class: Drupal\static_export_stream_wrapper_git\StreamWrapper\GitStream
+    tags:
+      - { name: stream_wrapper, scheme: static-git }
+
+  static_export_stream_wrapper_git.git_stream_event_subscriber:
+    class: Drupal\static_export_stream_wrapper_git\EventSubscriber\GitStreamEventSubscriber
+    arguments: [ "@config.factory", "@file_system", "@static_suite.cli_command_factory", "@static_export.file_collection_formatter" ]
+    tags:
+      - { name: event_subscriber }

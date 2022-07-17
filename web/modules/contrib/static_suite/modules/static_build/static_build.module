@@ -1,0 +1,211 @@
+<?php
+
+/**
+ * @file
+ * Static Build module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\StreamWrapper\StreamWrapperManager;
+use Drupal\Core\Url;
+use Drupal\static_build\Controller\ReleaseController;
+use Drupal\static_build\Plugin\StaticBuilderPluginInterface;
+use Drupal\static_suite\Utility\DirectoryDownloadHelperInterface;
+
+/**
+ * Implements hook_help().
+ */
+function static_build_help($route_name, RouteMatchInterface $route_match): string {
+  if ($route_name === 'help.page.static_build') {
+    $output = '<h3>' . t('About') . '</h3>';
+    $output .= '<p>' . t('Base module that enables building static sites from data exported by Static Export.') . '</p>';
+    $output .= '<h3>' . t('Uses') . '</h3>';
+    $output .= '<dl>';
+    $output .= '<dt>' . t('Base module for building your static site') . '</dt>';
+    $output .= '<dd>' . t('This module serves as an orchestrator for the process of building a site, and should be complemented with a compatible "static builder" module.') . '</dd>';
+    $output .= '</dl>';
+    return $output;
+  }
+  return '';
+}
+
+/**
+ * Implements hook_user_login().
+ *
+ * Drupal session cookie is set as httpOnly, so it's not accessible from JS.
+ */
+function static_build_user_login(AccountInterface $account) {
+  setcookie('DRUPAL_AUTHENTICATED_USER', $account->id(), 0, '/', '', FALSE, FALSE);
+}
+
+/**
+ * Implements hook_user_logout().
+ *
+ * Drupal session cookie is set as httpOnly, so it's not accessible from JS.
+ */
+function static_build_user_logout(AccountInterface $account) {
+  setcookie('DRUPAL_AUTHENTICATED_USER', $account->id(), time() - 3600, '/', '', FALSE, FALSE);
+}
+
+/**
+ * Implements hook_toolbar().
+ *
+ * Displays a progress bar in the toolbar to view the progress of a build.
+ *
+ * Visible in:
+ *  - administration pages.
+ *
+ * Not visible in:
+ *  - system.batch_page.html route.
+ *  - static_suite.admin_reports route.
+ *  - when the user does not have permissions.
+ */
+function static_build_toolbar(): array {
+
+  if (!static_suite_is_progress_bar_in_toolbar_allowed('view build progress in toolbar')) {
+    return [
+      '#weight' => 9999,
+      '#type' => 'toolbar_item',
+      '#cache' => ['max-age' => 0],
+      'tab' => [
+        '#type' => 'inline_template',
+        '#template' => '',
+      ],
+    ];
+  }
+
+  /** @var \Drupal\Core\Session\AccountProxyInterface $currentUser */
+  $currentUser = Drupal::service('current_user');
+
+  /** @var \Drupal\static_build\Plugin\StaticBuilderPluginManagerInterface $staticBuilderPluginManager */
+  $staticBuilderPluginManager = \Drupal::service('plugin.manager.static_builder');
+  $builderDefinitions = $staticBuilderPluginManager->getDefinitions();
+
+  /** @var \Drupal\Core\Config\ConfigFactoryInterface $configFactory */
+  $configFactory = \Drupal::service('config.factory');
+  $config = $configFactory->get('static_build.settings');
+
+  $runModes = [
+    StaticBuilderPluginInterface::RUN_MODE_LIVE,
+    StaticBuilderPluginInterface::RUN_MODE_PREVIEW,
+  ];
+
+  $items = [];
+  foreach ($runModes as $runMode) {
+    $enabledForThisRunMode = $config->get($runMode . '.toolbar');
+    if ($enabledForThisRunMode) {
+      $builderIdsForThisRunMode = $config->get($runMode . '.builders');
+      foreach ($builderIdsForThisRunMode as $builderId) {
+        if (!empty($builderDefinitions[$builderId])) {
+
+          $builderDefinition = $builderDefinitions[$builderId];
+          $batchUri = Url::fromRoute('static_build.release_list.running_data.batch', [
+            'builderId' => $builderDefinition['id'],
+            'runMode' => $runMode,
+            'destination' => '_none',
+          ])->toString();
+
+          $title = $builderDefinition['label'] . ' - ' . $runMode;
+          if ($currentUser->hasPermission('access site reports')) {
+            $title = [
+              '#type' => 'link',
+              '#url' => Url::fromRoute('static_build.release_list.' . $runMode, [
+                'builderId' => $builderDefinition['id'],
+                'runMode' => $runMode,
+              ]),
+              '#title' => $builderDefinition['label'] . ' - ' . $runMode,
+              '#attributes' => [
+                'target' => '_blank',
+                'title' => t('View build list'),
+              ],
+              '#cache' => ['max-age' => 0],
+            ];
+          }
+
+          $items['static-build-task-' . $builderDefinition['id'] . '-' . $runMode] = [
+            '#weight' => 9999,
+            '#type' => 'toolbar_item',
+            '#cache' => ['max-age' => 0],
+            'tab' => [
+              '#type' => 'inline_template',
+              '#attached' => [
+                'library' => ['static_suite/toolbar-progress-bar'],
+              ],
+              static_suite_progress_bar_theme($batchUri, $title),
+            ],
+          ];
+        }
+      }
+    }
+  }
+
+  return $items;
+}
+
+/**
+ * Implements hook_file_download().
+ */
+function static_build_file_download($uri) {
+  $scheme = StreamWrapperManager::getScheme($uri);
+  $target = StreamWrapperManager::getTarget($uri);
+
+  // A release download filename is composed by the builder id, its run mode,
+  // and the unique id, separated by ReleaseController::DOWNLOAD_SEPARATOR.
+  // Early opt-out if filename does not look like a release download filename.
+  if (substr_count($target, ReleaseController::DOWNLOAD_SEPARATOR) !== 2) {
+    return NULL;
+  }
+
+  /** @var \Drupal\static_build\Plugin\StaticBuilderPluginManagerInterface $staticBuilderPluginManager */
+  $staticBuilderPluginManager = \Drupal::service('plugin.manager.static_builder');
+  $localBuilderDefinitions = $staticBuilderPluginManager->getLocalDefinitions();
+
+  /** @var \Drupal\static_suite\Utility\UniqueIdHelperInterface $uniqueIdHelper */
+  $uniqueIdHelper = \Drupal::service('static_suite.unique_id_helper');
+
+  // Split target parts to validate filename.
+  $basename = basename($target, '.' . DirectoryDownloadHelperInterface::COMPRESSED_EXTENSION);
+  [
+    $builderId,
+    $runMode,
+    $uniqueId,
+  ] = explode(ReleaseController::DOWNLOAD_SEPARATOR, $basename);
+
+  // A release download filename is composed by the builder id, its run mode,
+  // and the unique id.
+  $releaseFilename = implode(ReleaseController::DOWNLOAD_SEPARATOR, [
+    $builderId,
+    $runMode,
+    $uniqueId,
+  ]);
+  $compressedFilename = $releaseFilename . '.' . DirectoryDownloadHelperInterface::COMPRESSED_EXTENSION;
+  $uncompressedFilename = $releaseFilename . '.' . DirectoryDownloadHelperInterface::UNCOMPRESSED_EXTENSION;
+
+  // Run validation.
+  if ($scheme === 'temporary' &&
+    isset($localBuilderDefinitions[$builderId]) &&
+    in_array($runMode, [
+      StaticBuilderPluginInterface::RUN_MODE_LIVE,
+      StaticBuilderPluginInterface::RUN_MODE_PREVIEW,
+    ], TRUE) &&
+    $uniqueIdHelper->isUniqueId($uniqueId) &&
+    in_array($target, [
+      $compressedFilename,
+      $uncompressedFilename,
+    ], TRUE)
+  ) {
+    if (\Drupal::currentUser()->hasPermission('download release')) {
+      $disposition = 'attachment; filename="' . $target . '"';
+      return [
+        'Content-disposition' => $disposition,
+      ];
+    }
+    return -1;
+  }
+
+  return NULL;
+}
+
+
+

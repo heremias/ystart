@@ -1,0 +1,30 @@
+<?php
+
+/**
+ * @file
+ * Static Builder Gatsby module file.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function static_builder_gatsby_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.static_builder_gatsby':
+      $output = '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t(
+          'This module is a plugin for  <a href=":static-build-url">Static Build</a> module and builds a static site using Gatsby.',
+          [
+            ':static-build-url' => 'https://www.drupal.org/project/static_build',
+          ]
+        ) . '</p>';
+      $output .= '<h3>' . t('Uses') . '</h3>';
+      $output .= '<dl>';
+      $output .= '<dt>' . t('Building a static site with Gatsby') . '</dt>';
+      $output .= '<dd>' . t('It works by spawning a background process which actually runs a gatsby build command on a bash shell.') . '</dd>';
+      $output .= '</dl>';
+      return $output;
+  }
+}

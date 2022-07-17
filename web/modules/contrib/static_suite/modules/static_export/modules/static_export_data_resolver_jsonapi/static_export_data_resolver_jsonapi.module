@@ -1,0 +1,100 @@
+<?php
+
+/**
+ * @file
+ * Static Export JSON:API Data Resolver module file.
+ */
+
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function static_export_data_resolver_jsonapi_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.static_export_data_resolver_jsonapi':
+      $output = '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t(
+          'Provides a JSON:API data resolver for Static Export module, part of the <a href=":static-suite-url">Static Suite</a> module. This module is one of the multiple data resolvers available for Static Export.',
+          [':static-suite-url' => 'https://www.drupal.org/project/static_suite']
+        ) . '</p>';
+      $output .= '<h3>' . t('Uses') . '</h3>';
+      $output .= '<dl>';
+      $output .= '<dt>' . t('Exporting data from a JSON:API endpoint') . '</dt>';
+      $output .= '<dd>' . t('Static Export export your entities to plain files. Data for those entities can be gathered from different sources, like JSON:API or GraphQL. This module obtains data from a JSON:API endpoint, executing a request defined per each entity type and bundle.') . '</dd>';
+      $output .= '</dl>';
+      return $output;
+  }
+}
+
+
+/**
+ * Implements hook_form_alter().
+ */
+function static_export_data_resolver_jsonapi_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  if ($form_id === 'exportable_entity_edit_form') {
+    $configFactory = \Drupal::service('config.factory');
+    $exportableEntity = $form_state->getformObject()->getEntity();
+    $defaultJsonApiRoute = $configFactory->get('static_export_data_resolver_jsonapi.settings')
+        ->get('endpoint') . '/' . str_replace('.', '/', $exportableEntity->id()) . '/{UUID}';
+
+    $form['export']['resolvers']['jsonapi_query_parameters'] = [
+      '#type' => 'textfield',
+      '#title' => t('JSON:API query parameters'),
+      '#maxlength' => 255,
+      '#default_value' => $configFactory->get('static_export_data_resolver_jsonapi.settings')
+        ->get('query_params.' . $exportableEntity->id()),
+      '#description' => t(
+        'JSON:API resolver will make a subrequest to <em>@default_jsonapi_route</em>, without any query parameter. Enter the query parameters to be added to that request (e.g.- include=field_image). Do not enter a leading question mark.',
+        ['@default_jsonapi_route' => $defaultJsonApiRoute]
+      ),
+      '#states' => [
+        'visible' => [
+          ':input[name="data_resolver"]' => ['value' => 'jsonapi'],
+        ],
+      ],
+    ];
+
+    $form['#validate'][] = '_static_export_data_resolver_jsonapi_form_validate';
+    // @todo - submit is not automatically called, maybe related to
+    //   https://www.drupal.org/project/drupal/issues/2252165
+    $form['#submit'][] = '_static_export_data_resolver_jsonapi_form_submit';
+  }
+}
+
+/**
+ * Validate jsonapi_query_parameters value
+ *
+ * @param array $form
+ *   Form array
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ *   Form state
+ */
+function _static_export_data_resolver_jsonapi_form_validate($form, FormStateInterface $form_state) {
+  $queryParams = trim($form_state->getValue('jsonapi_query_parameters'));
+  if ($queryParams && $queryParams[0] === '?') {
+    $form_state->setErrorByName('jsonapi_query_parameters', 'JSON:API query parameters contain a leading question mark.');
+  }
+  // @todo - submit is not automatically called, maybe related to
+  //   https://www.drupal.org/project/drupal/issues/2252165
+  _static_export_data_resolver_jsonapi_form_submit($form, $form_state);
+}
+
+/**
+ * Save config data
+ *
+ * @param array $form
+ *   Form array
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ *   Form state
+ */
+function _static_export_data_resolver_jsonapi_form_submit($form, FormStateInterface $form_state) {
+  $configFactory = \Drupal::service('config.factory');
+  $config = $configFactory->getEditable('static_export_data_resolver_jsonapi.settings');
+  $exportableEntity = $form_state->getformObject()->getEntity();
+  $queryParams = trim($form_state->getValue('jsonapi_query_parameters'));
+  $config
+    ->set('query_params.' . $exportableEntity->id(), empty($queryParams) ? NULL : $queryParams)
+    ->save();
+}

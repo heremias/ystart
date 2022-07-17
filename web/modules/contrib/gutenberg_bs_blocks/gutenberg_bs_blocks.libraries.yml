@@ -1,0 +1,59 @@
+bootstrap:
+  version: VERSION
+  css:
+    theme:
+      build/css/bootstrap.css: { }
+
+block-edit:
+  version: VERSION
+  css:
+    theme:
+      build/css/block-edit.css: { }
+  dependencies:
+    - gutenberg/edit-node
+
+block-view:
+  version: VERSION
+  css:
+    theme:
+      build/css/block-view.css: { }
+
+# Container block
+container-block-edit:
+  version: VERSION
+  js:
+    build/js/container.js: { }
+  css:
+    theme:
+      build/css/container-edit.css: { }
+  dependencies:
+    - gutenberg/edit-node
+
+container-block-view:
+  version: VERSION
+  css:
+    theme:
+      build/css/container-view.css: { }
+
+# Row block
+row-block-edit:
+  version: VERSION
+  js:
+    build/js/row.js: { }
+  css:
+    theme:
+      build/css/row-edit.css: { }
+  dependencies:
+    - gutenberg/edit-node
+
+# Column block
+column-block-edit:
+  version: VERSION
+  js:
+    build/js/column.js: { }
+  css:
+    theme:
+      build/css/column-edit.css: { }
+  dependencies:
+    - gutenberg/edit-node
+

@@ -1,0 +1,14 @@
+type: module
+name: Config Token
+description: Allow users to define custom tokens stored as configuration
+core: 8.x
+core_version_requirement: ^8 || ^9
+dependencies:
+  - token:token
+test_dependencies:
+  - token_filter:token_filter
+
+# Information added by Drupal.org packaging script on 2020-12-04
+version: '8.x-1.3'
+project: 'config_token'
+datestamp: 1607044469

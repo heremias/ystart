@@ -1,0 +1,15 @@
+batch:
+  version: 1.x
+  js:
+    js/batch.js: { }
+
+batch-toolbar:
+  version: 1.x
+  js:
+    js/batch-toolbar.js: { }
+
+toolbar-progress-bar:
+  version: 1.x
+  css:
+    component:
+      css/toolbar-progress-bar.css: { }

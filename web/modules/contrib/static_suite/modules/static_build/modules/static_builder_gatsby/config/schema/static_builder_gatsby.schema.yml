@@ -1,0 +1,54 @@
+# Schema for the configuration files of the static_builder_gatsby module.
+static_builder_gatsby.settings:
+  type: config_object
+  label: 'Static Builder - Gatsby settings'
+  mapping:
+    base_dir:
+      type: string
+      label: 'Base directory'
+    node:
+      type: mapping
+      label: 'Node.js group'
+      mapping:
+        live:
+          type: mapping
+          label: 'Node.js live group'
+          mapping:
+            options:
+              type: string
+              label: 'Node.js live options'
+        preview:
+          type: mapping
+          label: 'Node.js preview group'
+          mapping:
+            options:
+              type: string
+              label: 'Node.js preview options'
+    gatsby:
+      type: mapping
+      label: 'Gatsby group'
+      mapping:
+        live:
+          type: mapping
+          label: 'Gatsby live group'
+          mapping:
+            options:
+              type: string
+              label: 'Gatsby live options'
+        preview:
+          type: mapping
+          label: 'Gatsby preview group'
+          mapping:
+            options:
+              type: string
+              label: 'Gatsby preview options'
+    delete:
+      type: mapping
+      label: 'Delete group'
+      mapping:
+        cache:
+          type: boolean
+          label: 'Delete cache folder?'
+        public:
+          type: boolean
+          label: 'Delete public folder?'

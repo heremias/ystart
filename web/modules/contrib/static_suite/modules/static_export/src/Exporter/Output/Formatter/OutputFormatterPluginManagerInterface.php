@@ -1,0 +1,38 @@
+<?php
+
+namespace Drupal\static_export\Exporter\Output\Formatter;
+
+use Drupal\Component\Plugin\Discovery\CachedDiscoveryInterface;
+use Drupal\Component\Plugin\PluginManagerInterface;
+use Drupal\Core\Cache\CacheableDependencyInterface;
+
+/**
+ * Typed interface for Output Formatter Manager.
+ */
+interface OutputFormatterPluginManagerInterface extends PluginManagerInterface, CachedDiscoveryInterface, CacheableDependencyInterface {
+
+  /**
+   * {@inheritdoc}
+   *
+   * Wraps parent method to add typing.
+   *
+   * @return \Drupal\static_export\Exporter\Output\Formatter\OutputFormatterPluginInterface
+   *   A newly created formatter object instance.
+   */
+  public function createInstance($plugin_id, array $configuration = []): OutputFormatterPluginInterface;
+
+  /**
+   * {@inheritdoc}
+   *
+   * Wraps parent method to add typing.
+   *
+   * @return \Drupal\static_export\Exporter\Output\Formatter\OutputFormatterPluginInterface
+   *   A newly created formatter object instance, or a previously
+   *   instantiated one if available.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\PluginException
+   *   If the instance cannot be created, such as if the ID is invalid.
+   */
+  public function getInstance(array $options): OutputFormatterPluginInterface;
+
+}

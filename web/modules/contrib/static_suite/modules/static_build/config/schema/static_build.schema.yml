@@ -1,0 +1,79 @@
+# Schema for the configuration files of the static_build module.
+static_build.settings:
+  type: config_object
+  label: 'Static build settings'
+  mapping:
+
+    local:
+      type: mapping
+      label: 'Options for local builders'
+      mapping:
+        sync:
+          type: boolean
+          label: 'Execute synchronous local builds from web-server'
+
+    live:
+      type: mapping
+      label: 'Options for live builders'
+      mapping:
+        builders:
+          type: sequence
+          label: 'List of static builders to run in live mode'
+          sequence:
+            type: string
+            label: 'Live static builders'
+        build_trigger_regexp_list:
+          type: sequence
+          label: 'List of Regular Expressions to detect changed files that trigger a live build'
+          sequence:
+            type: string
+            label: 'Regular Expression'
+        toolbar:
+          type: boolean
+          label: 'Show build progress in toolbar for live mode'
+
+    preview:
+      type: mapping
+      label: 'Options for preview builders'
+      mapping:
+        builders:
+          type: sequence
+          label: 'List of static builders to run in preview mode'
+          sequence:
+            type: string
+            label: 'Live static builders'
+        build_trigger_regexp_list:
+          type: sequence
+          label: 'List of Regular Expressions to detect changed files that trigger a preview build'
+          sequence:
+            type: string
+            label: 'Regular Expression'
+        toolbar:
+          type: boolean
+          label: 'Show build progress in toolbar for preview mode'
+
+    base_dir:
+      type: string
+      label: 'Base directory for site building'
+    number_of_releases_to_keep:
+      type: integer
+      label: 'Number of releases to keep'
+    semaphore_timeout:
+      type: integer
+      label: 'Timeout for build semaphores'
+    env:
+      type: sequence
+      label: 'List of environment variables'
+      sequence:
+        type: string
+        label: 'Environment variable'
+    drush_options:
+      type: string
+      label: 'Drush options'
+
+    build_trigger_regexp_list_preview:
+      type: sequence
+      label: 'List of Regular Expressions to detect changed files that trigger a preview build'
+      sequence:
+        type: string
+        label: 'Regular Expression'

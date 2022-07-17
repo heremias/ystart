@@ -1,0 +1,152 @@
+<?php
+
+/**
+ * @file
+ * Main file for Extra CSS JS Module.
+ */
+
+use Drupal\Core\File\FileSystemInterface;
+use Drupal\Core\Asset\AttachedAssetsInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
+
+define('EXTRA_CSS_JS_CSS_PATH', 'public://css');
+define('EXTRA_CSS_JS_JS_PATH', 'public://js');
+
+/**
+ * Implements hook_help().
+ */
+function extra_css_js_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.extra_css_js':
+      $output = t('This module provides functionality to add extra css and js to the site.');
+      return $output;
+  }
+}
+
+/**
+ * Implements hook_rebuild().
+ */
+function extra_css_js_rebuild() {
+  extra_css_js_generate_css();
+  extra_css_js_generate_js();
+}
+
+/**
+ * Implements hook_css_alter().
+ */
+function extra_css_js_css_alter(&$css, AttachedAssetsInterface $assets) {
+  $css_suffix = \Drupal::state()->get('extra_css_suffix') ?: NULL;
+  $themes = \Drupal::config('extra_css_js.settings')->get('extra_css_js_themes');
+  $active_theme = \Drupal::service('theme.manager')->getActiveTheme()->getName();
+  if (empty($themes) || (!empty($themes) && in_array($active_theme, $themes))) {
+    if ($css_suffix) {
+      $cssfile = EXTRA_CSS_JS_CSS_PATH . '/extra_css_js_' . $css_suffix . '.css';
+    }
+    else {
+      $cssfile = EXTRA_CSS_JS_CSS_PATH . '/extra_css_js.css';
+    }
+    if (file_exists($cssfile) && $css) {
+      $css_path = ltrim(file_url_transform_relative(file_create_url($cssfile)), '/');
+      if (!empty($css_path)) {
+        $css[$css_path] = [
+          'weight' => CSS_COMPONENT,
+          'group' => CSS_AGGREGATE_DEFAULT,
+          'type' => 'file',
+          'data' => $css_path,
+          "version" => -1,
+          'media' => 'all',
+          'preprocess' => TRUE,
+          'browsers' => [
+            'IE' => TRUE,
+            '!IE' => TRUE,
+          ],
+        ];
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_js_alter().
+ */
+function extra_css_js_js_alter(&$javascript, AttachedAssetsInterface $assets) {
+  $js_suffix = \Drupal::state()->get('extra_js_suffix') ?: NULL;
+  $themes = \Drupal::config('extra_css_js.settings')->get('extra_css_js_themes');
+  $active_theme = \Drupal::service('theme.manager')->getActiveTheme()->getName();
+  if (empty($themes) || (!empty($themes) && in_array($active_theme, $themes))) {
+    if ($js_suffix) {
+      $js_file = EXTRA_CSS_JS_JS_PATH . '/extra_css_js_' . $js_suffix . '.js';
+    }
+    else {
+      $js_file = EXTRA_CSS_JS_JS_PATH . '/extra_css_js.js';
+    }
+    if (file_exists($js_file) && $javascript) {
+      $js_path = ltrim(file_url_transform_relative(file_create_url($js_file)), '/');
+      if (!empty($js_path)) {
+        $javascript[$js_path] = [
+          "group" => -100,
+          "type" => "file",
+          "data" => $js_path,
+          "version" => -1,
+          "minified" => FALSE,
+          "weight" => -100,
+          "cache" => TRUE,
+          "preprocess" => TRUE,
+          "attributes" => [],
+          "browsers" => [],
+          "scope" => "footer",
+        ];
+      }
+    }
+  }
+}
+
+/**
+ * Build CSS based on form settings.
+ */
+function extra_css_js_generate_css() {
+  $css = \Drupal::config('extra_css_js.settings')->get('extra_css_js_custom_css');
+  $csspath = EXTRA_CSS_JS_CSS_PATH;
+  // Generate suffix for new css file.
+  $css_suffix = time();
+  // Delete old css file if exists.
+  $css_old_suffix = \Drupal::state()->get('extra_css_suffix') ?: NULL;
+  if ($css_old_suffix) {
+    \Drupal::service('file_system')->delete($csspath . '/extra_css_js_' . $css_old_suffix . '.css');
+  }
+  // Save suffix to db.
+  \Drupal::state()->set('extra_css_suffix', $css_suffix);
+  // Save the CSS to a file in the files directory.
+  // make directory writable if it is read-only.
+  \Drupal::service('file_system')->prepareDirectory($csspath, FileSystemInterface::MODIFY_PERMISSIONS);
+  \Drupal::service('file_system')->saveData($css, $csspath . '/extra_css_js_' . $css_suffix . '.css', FileSystemInterface::EXISTS_REPLACE);
+
+  // We should flush CSS cache so that aggregated CSS gets rebuilt.
+  \Drupal::service('asset.css.collection_optimizer')->deleteAll();
+  _drupal_flush_css_js();
+}
+
+/**
+ * Build JS based on form settings.
+ */
+function extra_css_js_generate_js() {
+  $js = \Drupal::config('extra_css_js.settings')->get('extra_css_js_custom_js');
+  $js_path = EXTRA_CSS_JS_JS_PATH;
+  // Generate suffix for new js file.
+  $js_suffix = time();
+  // Delete old js file if exists.
+  $js_old_suffix = \Drupal::state()->get('extra_js_suffix') ?: NULL;
+  if ($js_old_suffix) {
+    \Drupal::service('file_system')->delete($js_path . '/extra_css_js_' . $js_old_suffix . '.js');
+  }
+  // Save suffix to db.
+  \Drupal::state()->set('extra_js_suffix', $js_suffix);
+  // Save the JS to a file in the files directory.
+  // make directory writable if it is read-only.
+  \Drupal::service('file_system')->prepareDirectory($js_path, FileSystemInterface::MODIFY_PERMISSIONS);
+  \Drupal::service('file_system')->saveData($js, $js_path . '/extra_css_js_' . $js_suffix . '.js', FileSystemInterface::EXISTS_REPLACE);
+
+  // We should flush JS cache so that aggregated JS gets rebuilt.
+  \Drupal::service('asset.js.collection_optimizer')->deleteAll();
+  _drupal_flush_css_js();
+}

@@ -1,0 +1,14 @@
+<?php
+
+/**
+ * @file
+ * Removes its storage object from the state of site instance.
+ */
+
+/**
+ * Implements hook_uninstall().
+ */
+function config_partial_export_uninstall() {
+  // Remove the storage object used by this module.
+  \Drupal::state()->delete('config_partial_export_form');
+}

@@ -1,0 +1,7 @@
+deployers: {}
+sync: false
+semaphore_timeout: 900
+toolbar: true
+env:
+  - 'CI=true'
+drush_options: ''

@@ -1,0 +1,55 @@
+services:
+  static_export.entity.commands:
+    class: Drupal\static_export\Commands\EntityCommands
+    arguments:
+      [
+        '@config.factory',
+        '@file_system',
+        '@language_manager',
+        '@entity_type.manager',
+        '@entity_type.bundle.info',
+        '@stream_wrapper_manager',
+        '@plugin.manager.static_entity_exporter',
+        '@static_export.entity_exporter_output_config_factory',
+        '@static_suite.entity_utils',
+        '@static_export.file_collection_formatter',
+      ]
+    tags:
+      - { name: drush.command }
+  static_export.config.commands:
+    class: Drupal\static_export\Commands\ConfigCommands
+    arguments:
+      [
+        '@config.factory',
+        '@plugin.manager.static_config_exporter',
+        '@static_export.file_collection_formatter',
+      ]
+    tags:
+      - { name: drush.command }
+  static_export.locale.commands:
+    class: Drupal\static_export\Commands\LocaleCommands
+    arguments:
+      [
+        '@config.factory',
+        '@language_manager',
+        '@plugin.manager.static_locale_exporter',
+        '@static_export.file_collection_formatter',
+      ]
+    tags:
+      - { name: drush.command }
+  static_export.copy_data.commands:
+    class: Drupal\static_export\Commands\CopyDataCommands
+    arguments:
+      [
+        '@config.factory',
+        '@file_system',
+        '@stream_wrapper_manager',
+        '@static_suite.lock_helper',
+      ]
+    tags:
+      - { name: drush.command }
+  static_export.stream_wapper.commands:
+    class: Drupal\static_export\Commands\StreamWrapperCommands
+    arguments: ['@file_system', '@static_export.uri_factory']
+    tags:
+      - { name: drush.command }

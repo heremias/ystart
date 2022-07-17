@@ -1,0 +1,16 @@
+type: module
+core: 8.x
+name: Configuration Partial Export
+description: Partial export of selected configuration files.
+core_version_requirement: ^8 || ^9
+package: Development
+# version: 8.x-1.0-dev
+dependencies:
+  - drupal:config
+tags:
+  - developer
+
+# Information added by Drupal.org packaging script on 2020-03-10
+version: '8.x-1.6'
+project: 'config_partial_export'
+datestamp: 1583832594

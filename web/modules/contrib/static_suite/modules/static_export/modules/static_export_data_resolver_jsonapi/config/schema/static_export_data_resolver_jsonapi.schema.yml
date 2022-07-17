@@ -1,0 +1,11 @@
+# Schema for the configuration files of the static_export_data_resolver_jsonapi module.
+static_export_data_resolver_jsonapi.settings:
+  type: config_object
+  label: 'Static Export JSON:API Data Resolver settings'
+  mapping:
+    endpoint:
+      type: string
+      label: 'Path to JSON:API endpoint'
+    query_params:
+      type: sequence
+      label: 'JSON:API query parameters for exportable entities'
