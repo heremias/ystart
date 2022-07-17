@@ -1,4 +1,4 @@
-cd configs
+cd config
 rm -rf *.*
 cd -
 tar -xvf configs.tar -C ~/ystart/configs
