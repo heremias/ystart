@@ -57,7 +57,6 @@ composer require drupal/views_data_export
 composer require drupal/views_reference_field
 composer require drupal/video_embed_field
 composer require drupal/video_embed_media
-composer require drupal/static_suite:^1.1@alpha
 composer require drupal/recurring_events:^2.0.x-dev
 composer require drupal/paragraphs
 composer require drupal/layout_paragraphs:^2.0@beta
@@ -103,9 +102,6 @@ composer require drupal/entity_export_csv:^1.0@beta
 composer require drupal/content_export_yaml:^3.2
 composer require drupal/default_content:^2.0@alpha
 composer require drupal/export_action_for_default_content:^1.0@beta
-
-
-
 
 cd /var/www/drupal/web/sites/default
 chmod 777 -R files
