@@ -2,7 +2,7 @@ FROM ghcr.io/heremias/y-base-y-master:latest
 
 RUN chmod 777 -R /var/www/drupal/web/sites/default/files
 ADD /scripts /var/www
-COPY scripts/* /var/www/scripts
+COPY ./scripts/ /var/www/scripts
 
 COPY load.sh /var/www
 RUN chmod 777 load.sh
