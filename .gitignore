@@ -67,4 +67,6 @@
 /web.tar
 /helm/ysite-chart-*.tgz
 /.DS_Store
+/*/.DS_Store
+/*/*/.DS_Store
 /.vscode
