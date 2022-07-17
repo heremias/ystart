@@ -1,0 +1,1 @@
+docker run -d --name SITE -p 8080:80 ghcr.io/heremias/sid-y-master:latest

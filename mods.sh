@@ -91,6 +91,7 @@ composer require drupal/config_update:^1.7
 composer require drupal/openy_lily:^1.1
 composer require drupal/openy_carnation:^2
 composer require drupal/openy_rose:^1.1
+composer require drupal/plugin:^2.9
 
 cd /var/www/drupal/web/sites/default
 chmod 777 -R files
