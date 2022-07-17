@@ -220,7 +220,7 @@ $databases = [];
  * directory in the public files path. The setting below allows you to set
  * its location.
  */
-# $settings['config_sync_directory'] = '/directory/outside/webroot';
+$settings['config_sync_directory'] = '/var/www/config';
 
 /**
  * Settings:
@@ -503,7 +503,7 @@ $settings['update_free_access'] = FALSE;
  * See https://www.drupal.org/documentation/modules/file for more information
  * about securing private files.
  */
-# $settings['file_private_path'] = '';
+$settings['file_private_path'] = '../private';
 
 /**
  * Temporary file path:
@@ -778,4 +778,4 @@ $databases['default']['default'] = array (
   'driver' => 'sqlite',
   'autoload' => 'core/modules/sqlite/src/Driver/Database/sqlite/',
 );
-$settings['config_sync_directory'] = 'sites/default/files/config_M8PhRWPpclyZHNReTk5aCNF1A_G0_yrh92Cu_xkM6kHg5sLe9QP0k0s6ivxI3fx6JaxkDCurRg/sync';
+$settings['config_sync_directory'] = '../sync';
