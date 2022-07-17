@@ -92,6 +92,20 @@ composer require drupal/openy_carnation:^2
 composer require drupal/openy_rose:^1.1
 composer require drupal/plugin:^2.9
 composer require drupal/search_api_solr:^4.2
+composer require drupal/media_library_importer:^1.0@beta
+composer require drupal/bulk_import_feed_links:^1.0@alpha
+composer require drupal/entity_import:^1.0@alpha
+composer require drupal/content_csv_export_import:^1.0
+composer require drupal/entities_import:^1.2
+composer require drupal/contentimport:^9.3
+composer require drupal/csv_importer:^1.14
+composer require drupal/entity_export_csv:^1.0@beta
+composer require drupal/content_export_yaml:^3.2
+composer require drupal/default_content:^2.0@alpha
+composer require drupal/export_action_for_default_content:^1.0@beta
+
+
+
 
 cd /var/www/drupal/web/sites/default
 chmod 777 -R files
