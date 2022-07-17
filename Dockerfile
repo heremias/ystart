@@ -14,6 +14,5 @@ RUN chmod 777 dsync.sh
 RUN chmod 777 getuuid.sh
 
 RUN ./mods.sh
-RUN ./dsync.sh
 
 #EXPOSE 80
