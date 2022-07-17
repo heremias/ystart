@@ -66,3 +66,4 @@
 /configs
 /web.tar
 /helm/ysite-chart-*.tgz
+/.DS_Store
