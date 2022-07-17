@@ -1,7 +1,7 @@
 cd config
 rm -rf *.*
 cd -
-tar -xvf config.tar -C ~/nhd/config
+tar -xvf configs.tar -C ~/ystart/configs
 docker ps | grep 'SITE' | awk '{print $1}' > cid.txt
 cid=$(<cid.txt)
 docker exec $cid /bin/sh -c "/var/www/drupal/getuuid.sh" > uuid.txt
@@ -11,8 +11,8 @@ cd config
 sed -n 4p system.site.yml > uid.txt
 sed -ri -e 's!uuid: !!g' uid.txt
 cd ../
-mv uuid.txt config/uuid.txt
-cd config
+mv uuid.txt configs/uuid.txt
+cd configs
 uuid=$(<uuid.txt)
 uid=$(<uid.txt)
 if test $uuid = $uid
@@ -21,8 +21,8 @@ then
   else echo "Not same"
 fi
 echo "Diff $uuid"
-sed -i .bak "4s/$uid/$uuid/" ~/nhd/config/system.site.yml
-tar cvf config.tar *.*
-mv config.tar ../
+sed -i .bak "4s/$uid/$uuid/" ~/nhd/configs/system.site.yml
+tar cvf configs.tar *.*
+mv configs.tar ../
 cd ../
-docker cp ~/nhd/config.tar $cid:/var/www/config.tar
+docker cp ~/ystart/configs.tar $cid:/var/www/configs.tar

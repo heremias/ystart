@@ -1,3 +1,4 @@
+cd drupal
 composer require drupal/gutenberg
 composer require drupal/feeds:3.x-dev
 composer require drupal/tamper:1.x-dev
@@ -92,3 +93,11 @@ composer require drupal/config_update:^1.7
 
 cd /var/www/drupal/web/sites/default
 chmod 777 -R files
+cd /var/www/drupal
+tar cvf web.tar web
+mv web.tar ../
+cd ../
+mkdir tmp
+tar -xvf web.tar -C tmp
+cd tmp
+ls
