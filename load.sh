@@ -45,7 +45,6 @@ composer require drupal/blazy
 composer require drupal/field_inheritance:2.0.x-dev
 composer require drupal/gatsby:^2.0@RC
 composer require drupal/geolocation
-composer require drupal/addtocal
 composer require drupal/feeds_ex:^1.0@beta
 composer require drupal/recurring_events:2.0.x-dev
 composer require drupal/search_api
