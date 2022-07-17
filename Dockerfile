@@ -10,6 +10,7 @@ COPY getuuid.sh /var/www
 COPY configs.tar /var/www
 COPY settings.php /var/www
 COPY webcp.sh /var/www
+RUN chmod -R 777 scripts
 RUN chmod 777 webcp.sh
 RUN chmod 777 load.sh
 RUN chmod 777 concp.sh
