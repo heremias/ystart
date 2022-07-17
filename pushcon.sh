@@ -21,7 +21,7 @@ then
   else echo "Not same"
 fi
 echo "Diff $uuid"
-sed -i .bak "4s/$uid/$uuid/" ~/nhd/configs/system.site.yml
+sed -i .bak "4s/$uid/$uuid/" ~/start/configs/system.site.yml
 tar cvf configs.tar *.*
 mv configs.tar ../
 cd ../
