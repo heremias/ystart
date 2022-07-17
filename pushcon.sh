@@ -2,7 +2,7 @@ cd configs
 rm -rf *.*
 cd -
 tar -xvf configs.tar -C ~/ystart/configs
-docker ps | grep 'SITE' | awk '{print $1}' > cid.txt
+docker ps | grep 'STAGE' | awk '{print $1}' > cid.txt
 cid=$(<cid.txt)
 docker exec $cid /bin/sh -c "/var/www/drupal/getuuid.sh" > uuid.txt
 sed -i .bak -n 1p uuid.txt
@@ -22,7 +22,8 @@ then
 fi
 echo "Diff $uuid"
 sed -i .bak "4s/$uid/$uuid/" ~/start/configs/system.site.yml
-tar cvf configs.tar *.*
-mv configs.tar ../
+cd ~/ystart
+tar cvf configs.tar configs
+mv configs.tar ../configs.tar
 cd ../
 docker cp ~/ystart/configs.tar $cid:/var/www/configs.tar
