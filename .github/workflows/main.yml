@@ -6,12 +6,11 @@ on:
   push:
     branches:
       - dev
-      - main
 
 env:
   # Build
   NODE_ENV: "development"
-  RUNTIME_ENV: "master"
+  RUNTIME_ENV: "test"
 
   # Container Registry
   CONTAINER_REGISTRY_HOSTNAME: ghcr.io
