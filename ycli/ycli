@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+set -e
+export YCLI_WORKDIR=$(cd $(dirname $0) && pwd)
+# shellcheck source=common
+. "$YCLI_WORKDIR/common"
+
+cli_help() {
+  cli_name=${0##*/}
+  echo "
+$cli_name
+Brot and Games CLI
+Version: $(cat $YCLI_WORKDIR/VERSION)
+https://github.com/brotandgames/bagcli
+
+Usage: $cli_name [command]
+
+Commands:
+  deploy    Deploy
+  *         Help
+"
+  exit 1
+}
+
+cli_log "Exporting config ..."
+[ ! -f "$YCLI_WORKDIR/config" ] \
+  && echo "ERROR: No $YCLI_WORKDIR/config file found. " \
+  && echo "cp $YCLI_WORKDIR/config.template $YCLI_WORKDIR/config and adjust." \
+  && exit 1
+
+export $(cat "$YCLI_WORKDIR/config" | xargs)
+
+case "$1" in
+  deploy|d)
+    "$YCLI_WORKDIR/commands/deploy" "$2" | tee -ia "$YCLI_WORKDIR/logs/deploy_${2}.log"
+    ;;
+  *)
+    cli_help
+    ;;
+esac

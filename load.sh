@@ -1,4 +1,4 @@
-cd drupal
+cd ../drupal
 composer require drupal/gutenberg
 composer require drupal/feeds:3.x-dev
 composer require drupal/tamper:1.x-dev
@@ -103,6 +103,7 @@ composer require drupal/content_export_yaml:^3.2
 composer require drupal/default_content:^2.0@alpha
 composer require drupal/export_action_for_default_content:^1.0@beta
 composer require drupal/views_bulk_operations:^4.1
+composer require drupal/static_suite:^1.1@alpha
 
 cd /var/www/drupal/web/sites/default
 chmod 777 -R files
