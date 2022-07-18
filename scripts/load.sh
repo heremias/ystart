@@ -107,11 +107,3 @@ composer require drupal/static_suite:^1.1@alpha
 
 cd /var/www/drupal/web/sites/default
 chmod 777 -R files
-cd /var/www/drupal
-tar cvf web.tar web
-mv web.tar ../
-cd ../
-mkdir tmp
-tar -xvf web.tar -C tmp
-cd tmp
-ls
