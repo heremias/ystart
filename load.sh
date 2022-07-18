@@ -1,4 +1,4 @@
-cd drupal
+cd ../drupal
 composer require drupal/gutenberg
 composer require drupal/feeds:3.x-dev
 composer require drupal/tamper:1.x-dev
