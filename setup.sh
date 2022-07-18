@@ -11,6 +11,7 @@ sid=$( tail -n 1 environments/test/.env )
 
 tar -xvf configs.tar -C configs
 cd configs
+
 sed -in .bak 4p system.site.yml >> ../environments/dev/.env
 uuid=$( tail -n 1 ../environments/dev/.env )
 sed -i .bak "4s/uuid: $uuid/$sid/" system.site.yml
