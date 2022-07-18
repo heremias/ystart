@@ -1,8 +1,8 @@
 git log -1 --pretty=%h > commit.txt
 tag=$(<commit.txt)
-docker build -t ysite:$tag .
-docker tag ysite:$tag ysite:latest
-docker run -d --name SITE -p 8081:80 ysite:latest
-docker ps | grep 'SITE' | awk '{print $1}' > sid.txt
-sid=$(<sid.txt)
-docker exec $sid /bin/sh -c "/var/www/dsync.sh"
+docker build -t ystage:$tag .
+docker tag ystage:$tag ystage:latest
+docker run -d --name TEST -p 8082:80 ystage:latest
+docker ps | grep 'TEST' | awk '{print $1}' > environments/test/.env
+cid=$(<environments/test/.env)
+docker exec $cid /bin/sh -c "/var/www/dsync.sh"
