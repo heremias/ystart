@@ -7,19 +7,18 @@ export YCLI_WORKDIR=$(cd $(dirname $0) && pwd)
 cli_help() {
   cli_name=${0##*/}
   echo "
-$cli_name
-Brot and Games CLI
-Version: $(cat $YCLI_WORKDIR/VERSION)
-https://github.com/brotandgames/bagcli
+  $cli_name
+  Y CLI
+  Version: $(cat $YCLI_WORKDIR/VERSION)
 
-Usage: $cli_name [command]
+  Usage: $cli_name [command]
 
-Commands:
-  deploy    Deploy
-  *         Help
-"
-  exit 1
-}
+  Commands:
+    deploy    Deploy
+    *         Help
+  "
+    exit 1
+  }
 
 cli_log "Exporting config ..."
 [ ! -f "$YCLI_WORKDIR/config" ] \
