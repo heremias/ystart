@@ -1,0 +1,1 @@
+docker ps | grep 'TEST' | awk '{print $1}'

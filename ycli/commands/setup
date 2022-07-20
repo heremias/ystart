@@ -2,29 +2,31 @@
 set -e
 . "$YCLI_WORKDIR/common"
 
-cli_help_deploy() {
+cli_help_setup() {
   echo "
-Command: deploy
+Command: setup
 
 Usage: 
-  deploy project_name"
+  setup project_name"
   exit 1
 }
 
-[ ! -n "$1" ] && cli_help_deploy
+[ ! -n "$1" ] && cli_help_setup
 
 export YCLI_PROJECT_NAME=$1
 
-cli_log "Deployment BEGIN"
+cli_log "Setup BEGIN"
 
 cli_log "ENV variables"
 env | grep "YCLI_*"
 
-cli_log "Executing helm upgrade --install ..."
-echo "Example TEST"
+cli_log "Executing setup"
+
+./scripts/setup.sh
+# Example
 # helm upgrade --install \
 #   --wait \
 #   --values $YCLI_PROJECTS_PATH/$YCLI_PROJECT_NAME/values.yaml \
 #   --namespace $YCLI_K8S_NAMESPACE $YCLI_PROJECT_NAME $YCLI_REPO_PATH
 
-cli_log "Deployment END"
+cli_log "Setup END"

@@ -3,10 +3,15 @@ FROM ghcr.io/heremias/y-base-y-stage:latest
 RUN chmod 777 -R /var/www/drupal/web/sites/default/files
 ADD /scripts /var/www
 COPY ./scripts/ /var/www/scripts
-COPY scripts/getuuid.sh /var/www/drupal
+COPY getuuid.sh /var/www
+COPY parsey.sh /var/www
+RUN mv /var/www/scripts/getuuid.sh drupal
+RUN mv /var/www/scripts/cex.sh drupal
+RUN chmod 777 /var/www/drupal/cex.sh
+RUN mv parsey.sh drupal
 COPY configs.tar /var/www
 COPY settings.php /var/www
 
-RUN ./scripts/load.sh
+#RUN ./scripts/load.sh
 
 #EXPOSE 80

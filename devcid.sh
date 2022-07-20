@@ -1,0 +1,1 @@
+docker ps | grep 'DEV' | awk '{print $1}'

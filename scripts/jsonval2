@@ -1,0 +1,6 @@
+function jsonValue() {
+KEY1=$1
+KEY2=$2
+awk -F"[,:}]" '{for(i=1;i<=NF;i++){if($i~/'$KEY1'\042/){print $(i+1)}}}'
+awk -F"[,:}]" '{for(i=1;i<=NF;i++){if($i~/'$KEY2'\042/){print $(i+1)}}}'
+}

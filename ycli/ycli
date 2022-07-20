@@ -15,7 +15,8 @@ cli_help() {
 
   Commands:
     deploy    Deploy
-    *         Help
+    getuuid   Getuuid
+    setup     setup
   "
     exit 1
   }

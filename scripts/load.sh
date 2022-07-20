@@ -104,6 +104,8 @@ composer require drupal/default_content:^2.0@alpha
 composer require drupal/export_action_for_default_content:^1.0@beta
 composer require drupal/views_bulk_operations:^4.1
 composer require drupal/static_suite:^1.1@alpha
+composer require drupal/graphql_fragment_include:^1.5
+
 
 cd /var/www/drupal/web/sites/default
 chmod 777 -R files
