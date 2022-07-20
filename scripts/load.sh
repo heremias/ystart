@@ -109,3 +109,5 @@ composer require drupal/graphql_fragment_include:^1.5
 
 cd /var/www/drupal/web/sites/default
 chmod 777 -R files
+
+drush cex -y

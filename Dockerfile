@@ -8,6 +8,6 @@ RUN chmod 777 /var/www/drupal/cex.sh
 COPY configs.tar /var/www
 COPY settings.php /var/www
 
-#RUN ./scripts/load.sh
+RUN ./scripts/load.sh
 
 #EXPOSE 80
