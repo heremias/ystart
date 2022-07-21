@@ -1,6 +1,0 @@
-services:
-  static_export_exporter_redirect.commands:
-    class: Drupal\static_export_exporter_redirect\Commands\RedirectCommands
-    arguments: [ "@plugin.manager.static_custom_exporter", "@static_export.file_collection_formatter" ]
-    tags:
-      - { name: drush.command }

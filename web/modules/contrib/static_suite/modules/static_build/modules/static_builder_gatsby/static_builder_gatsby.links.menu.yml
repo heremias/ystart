@@ -1,5 +1,0 @@
-static_builder_gatsby.settings:
-  title: Gatsby Static Builder
-  parent: static_build.settings
-  description: Manage Static Build settings.
-  route_name: static_builder_gatsby.settings

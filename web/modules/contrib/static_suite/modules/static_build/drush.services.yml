@@ -1,6 +1,0 @@
-services:
-  static_build.commands:
-    class: Drupal\static_build\Commands\StaticBuildCommands
-    arguments: [ "@config.factory", "@plugin.manager.static_builder" ]
-    tags:
-      - { name: drush.command }

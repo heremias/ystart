@@ -1,7 +1,0 @@
-static_deployer_s3.settings:
-  path: '/admin/config/static/deploy/s3'
-  defaults:
-    _form: \Drupal\static_deployer_s3\Form\SettingsForm
-    _title: 'AWS S3 Static Deployer settings'
-  requirements:
-    _permission: 'administer site configuration'

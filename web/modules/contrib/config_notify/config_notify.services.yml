@@ -1,4 +1,0 @@
-services:
-  config_notify.notifier:
-    class: Drupal\config_notify\NotifierService
-    arguments: ['@messenger', '@config.manager', '@config.import_transformer', '@config.storage.sync', '@config.storage', '@date.formatter', '@module_handler', '@state', '@plugin.manager.mail', '@config.factory', '@language_manager']

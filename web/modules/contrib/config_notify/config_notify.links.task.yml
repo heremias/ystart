@@ -1,5 +1,0 @@
-config_notify.notify:
-    route_name: config_notify.settings
-    title: 'Notify'
-    base_route: config.sync
-    weight: 1000

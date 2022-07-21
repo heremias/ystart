@@ -1,7 +1,0 @@
-static_export_output_formatter_xml.settings:
-  path: '/admin/config/static/export/output-formatters/xml'
-  defaults:
-    _form: \Drupal\static_export_output_formatter_xml\Form\SettingsForm
-    _title: 'Settings for XML output formatter'
-  requirements:
-    _permission: 'administer site configuration'

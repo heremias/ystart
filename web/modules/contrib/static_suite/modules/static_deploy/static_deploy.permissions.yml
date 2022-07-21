@@ -1,9 +1,0 @@
-run deployments on demand:
-  title: "run deployments on demand"
-  description: 'Allows user to run a new deploy on demand.'
-  restrict access: true
-
-view reports of deploys on toolbar:
-  title: "View deploy progress in toolbar"
-  description: 'Allows user to view the progress of deploys in toolbar'
-  restrict access: true

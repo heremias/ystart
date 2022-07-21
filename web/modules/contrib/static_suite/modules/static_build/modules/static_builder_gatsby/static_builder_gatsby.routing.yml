@@ -1,7 +1,0 @@
-static_builder_gatsby.settings:
-  path: '/admin/config/static/build/gatsby'
-  defaults:
-    _form: \Drupal\static_builder_gatsby\Form\SettingsForm
-    _title: 'Static Builder - Gatsby: Settings'
-  requirements:
-    _permission: 'administer site configuration'

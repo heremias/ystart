@@ -1,4 +1,0 @@
-services:
-  static_export_data_resolver_jsonapi.jsonapi_request_handler:
-    class: Drupal\static_export_data_resolver_jsonapi\JsonapiRequestHandler
-    arguments: [ "@http_kernel.basic" ]

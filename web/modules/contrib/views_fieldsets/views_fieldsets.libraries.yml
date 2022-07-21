@@ -1,5 +1,0 @@
-admin:
-  version: 1.x
-  css:
-    theme:
-      views_fieldsets.admin.css: {}

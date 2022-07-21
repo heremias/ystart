@@ -1,7 +1,0 @@
-static_export_output_formatter_json.settings:
-  path: '/admin/config/static/export/output-formatters/json'
-  defaults:
-    _form: \Drupal\static_export_output_formatter_json\Form\SettingsForm
-    _title: 'Settings for JSON output formatter'
-  requirements:
-    _permission: 'administer site configuration'
