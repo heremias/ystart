@@ -1,7 +1,0 @@
-static_export_data_resolver_graphql.settings:
-  path: '/admin/config/static/export/entity/resolver/graphql'
-  defaults:
-    _form: \Drupal\static_export_data_resolver_graphql\Form\SettingsForm
-    _title: 'Settings for GraphQL resolver'
-  requirements:
-    _permission: 'administer site configuration'

@@ -1,3 +1,0 @@
-cli_allowed_users: { }
-cli_throw_exception_interactive_tty: false
-cli_throw_exception_non_interactive_tty: false

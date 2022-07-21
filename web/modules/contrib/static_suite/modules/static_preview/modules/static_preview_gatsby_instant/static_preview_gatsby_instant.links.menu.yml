@@ -1,6 +1,0 @@
-static_preview_gatsby_instant.settings:
-  title: Static Preview
-  parent: static_suite.settings
-  description: Manage Static Preview - Gatsby Instant settings.
-  route_name: static_preview_gatsby_instant.settings
-  weight: 25

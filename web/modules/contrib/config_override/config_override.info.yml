@@ -1,8 +1,0 @@
-name: Config Override
-type: module
-core_version_requirement: ^8 || ^9
-
-# Information added by Drupal.org packaging script on 2021-06-10
-version: '8.x-1.0-rc1'
-project: 'config_override'
-datestamp: 1623296627

@@ -1,7 +1,0 @@
-static_export_stream_wrapper_local.settings:
-  type: config_object
-  label: 'Settings for static-local stream wrapper'
-  mapping:
-    data_dir:
-      type: string
-      label: 'Data directory path'

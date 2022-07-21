@@ -1,5 +1,0 @@
-static_deployer_s3.settings:
-  title: AWS S3 Static Deployer
-  parent: static_deploy.settings
-  description: Manage Static Deployer AWS S3 settings.
-  route_name: static_deployer_s3.settings

@@ -1,3 +1,0 @@
-format: csv
-csv:
-  pattern: "[redirect_source__path]\t[redirect_redirect__uri]\t[status_code]"

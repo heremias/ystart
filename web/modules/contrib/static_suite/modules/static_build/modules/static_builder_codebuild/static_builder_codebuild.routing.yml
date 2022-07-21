@@ -1,7 +1,0 @@
-static_builder_codebuild.settings:
-  path: '/admin/config/static/build/codebuild'
-  defaults:
-    _form: \Drupal\static_builder_codebuild\Form\SettingsForm
-    _title: 'Static Builder - AWS Codebuild: Settings'
-  requirements:
-    _permission: 'administer site configuration'

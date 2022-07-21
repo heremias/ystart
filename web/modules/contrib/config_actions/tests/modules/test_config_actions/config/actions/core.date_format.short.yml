@@ -1,4 +1,0 @@
-plugin: change
-"@label@": 'Test short date'
-path: ['label']
-value: '@label@'

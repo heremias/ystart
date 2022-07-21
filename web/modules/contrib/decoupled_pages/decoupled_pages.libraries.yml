@@ -1,4 +1,0 @@
-# Use this asset to test that your decoupled page route definition works.
-route_test:
-  js:
-    assets/js/route-test.js: { minified: false }
